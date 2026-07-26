@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:16
+    image: postgres:16-alpine
     container_name: postgres-db
     restart: unless-stopped
     environment:
@@ -11,7 +11,31 @@ services:
       - "5434:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d mydb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: trends-bird-api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: "postgresql://postgres:password@postgres:5432/mydb?schema=public"
+      JWT_ACCESS_SECRET: "docker-dev-access-secret-key-12345"
+      JWT_ACCESS_EXPIRES_IN: "15m"
+      JWT_REFRESH_SECRET: "docker-dev-refresh-secret-key-12345"
+      JWT_REFRESH_EXPIRES_IN: "30d"
+      COOKIE_SECRET: "docker-dev-cookie-secret-key-12345"
+      PORT: 3000
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 volumes:
   postgres-data:
-  
