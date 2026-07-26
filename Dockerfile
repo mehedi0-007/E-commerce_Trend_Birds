@@ -3,10 +3,10 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Install dependencies required for Prisma native binary on Alpine
+# Install OpenSSL for Prisma native binary on Alpine
 RUN apk add --no-cache openssl
 
-# Copy package files
+# Copy package files and Prisma schema
 COPY package*.json ./
 COPY prisma ./prisma/
 
@@ -25,12 +25,12 @@ FROM node:20-alpine AS runner
 
 WORKDIR /app
 
-# Install OpenSSL for Prisma engine compatibility on Alpine
+# Install OpenSSL for Prisma compatibility
 RUN apk add --no-cache openssl
 
 COPY package*.json ./
 
-# Copy built artifacts and node_modules from builder
+# Copy built artifacts and dependencies
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
@@ -40,5 +40,4 @@ EXPOSE 3000
 
 ENV NODE_ENV=production
 
-# Entry command: Run migrations, seed DB, and start production server
 CMD ["sh", "-c", "npx prisma db push && npx prisma db seed && node dist/main.js"]
