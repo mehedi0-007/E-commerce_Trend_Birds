@@ -1,4 +1,4 @@
-import { AuthenticatedUser } from '../common/interfaces/authenticated-user.interface';
+import { AuthenticatedUser } from "../common/interfaces/authenticated-user.interface";
 
 export interface TokenBundle {
   accessToken: string;
