@@ -25,12 +25,12 @@ Phase one implements the NestJS foundation, auth flow, and global access-control
 ## Current Status
 
 - Phase 1: complete
-- Permission: not attempted
-- Role: not attempted
-- User: not attempted
+- Phase 2: complete
+- Permission: complete
+- Role: complete
+- User: complete
 - Media: not attempted
 - Category: not attempted
 - Brand: not attempted
 - Attribute: not attempted
 - Product: not attempted
-
