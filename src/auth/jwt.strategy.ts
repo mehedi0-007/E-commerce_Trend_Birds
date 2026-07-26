@@ -1,9 +1,9 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { PassportStrategy } from '@nestjs/passport';
-import { ExtractJwt, Strategy } from 'passport-jwt';
-import { PrismaService } from '../prisma/prisma.service';
-import { AuthenticatedUser } from '../common/interfaces/authenticated-user.interface';
+import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { PassportStrategy } from "@nestjs/passport";
+import { ExtractJwt, Strategy } from "passport-jwt";
+import { AuthenticatedUser } from "../common/interfaces/authenticated-user.interface";
+import { PrismaService } from "../prisma/prisma.service";
 
 type JwtPayload = {
   sub: string;
@@ -18,7 +18,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configService.get<string>('JWT_ACCESS_SECRET') ?? 'dev-access-secret',
+      secretOrKey:
+        configService.get<string>("JWT_ACCESS_SECRET") ?? "dev-access-secret",
     });
   }
 
@@ -31,9 +32,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
             permissions: {
               include: {
                 permission: {
-                  include: {
-                    group: true,
-                  },
+                  select: { name: true },
                 },
               },
             },
@@ -43,7 +42,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
 
     if (!user || !user.active) {
-      throw new UnauthorizedException('Token is invalid or the account is inactive');
+      throw new UnauthorizedException(
+        "Token is invalid or the account is inactive",
+      );
     }
 
     return this.mapUser(user);
@@ -59,18 +60,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         id: user.role.id,
         name: user.role.name,
         description: user.role.description,
-        permissions: user.role.permissions.map(({ permission }: any) => ({
-          id: permission.id,
-          name: permission.name,
-          description: permission.description,
-          group: {
-            id: permission.group.id,
-            name: permission.group.name,
-            description: permission.group.description,
-          },
-        })),
       },
-      permissions: user.role.permissions.map(({ permission }: any) => permission.name),
+      permissions: user.role.permissions.map(
+        ({ permission }: any) => permission.name,
+      ),
     };
   }
 }

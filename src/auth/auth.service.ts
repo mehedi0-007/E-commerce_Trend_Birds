@@ -1,15 +1,15 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
-import { compare, hash } from 'bcryptjs';
-import { randomBytes } from 'crypto';
-import { AuthenticatedUser } from '../common/interfaces/authenticated-user.interface';
-import { PrismaService } from '../prisma/prisma.service';
-import { AuthResponse, TokenBundle } from './auth.types';
-import { LoginDto } from './dto/login.dto';
+import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { JwtService } from "@nestjs/jwt";
+import { compare, hash } from "bcryptjs";
+import { randomBytes } from "crypto";
+import { AuthenticatedUser } from "../common/interfaces/authenticated-user.interface";
+import { PrismaService } from "../prisma/prisma.service";
+import { AuthResponse, TokenBundle } from "./auth.types";
+import { LoginDto } from "./dto/login.dto";
 
-const INVALID_CREDENTIALS_MESSAGE = 'Invalid email or password';
-const INVALID_TOKEN_MESSAGE = 'Refresh token is invalid or expired';
+const INVALID_CREDENTIALS_MESSAGE = "Invalid email or password";
+const INVALID_TOKEN_MESSAGE = "Refresh token is invalid or expired";
 
 @Injectable()
 export class AuthService {
@@ -28,9 +28,7 @@ export class AuthService {
             permissions: {
               include: {
                 permission: {
-                  include: {
-                    group: true,
-                  },
+                  select: { name: true },
                 },
               },
             },
@@ -61,7 +59,9 @@ export class AuthService {
     const user = await this.findUserWithAccessData(userId);
 
     if (!user || !user.active) {
-      throw new UnauthorizedException('Token is invalid or the account is inactive');
+      throw new UnauthorizedException(
+        "Token is invalid or the account is inactive",
+      );
     }
 
     return this.mapUser(user);
@@ -71,7 +71,12 @@ export class AuthService {
     const payload = await this.verifyRefreshToken(refreshToken);
     const user = await this.findUserWithAccessData(payload.sub);
 
-    if (!user || !user.active || !user.refreshTokenHash || !user.refreshTokenExpiresAt) {
+    if (
+      !user ||
+      !user.active ||
+      !user.refreshTokenHash ||
+      !user.refreshTokenExpiresAt
+    ) {
       throw new UnauthorizedException(INVALID_TOKEN_MESSAGE);
     }
 
@@ -121,13 +126,16 @@ export class AuthService {
   async issueTokens(userId: string): Promise<TokenBundle> {
     const accessToken = await this.jwtService.signAsync({ sub: userId });
     const refreshToken = await this.jwtService.signAsync(
-      { sub: userId, tokenUse: 'refresh' },
+      { sub: userId, tokenUse: "refresh" },
       {
-        secret: this.configService.get<string>('JWT_REFRESH_SECRET') ?? 'dev-refresh-secret',
-        expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRES_IN') ?? '30d',
+        secret:
+          this.configService.get<string>("JWT_REFRESH_SECRET") ??
+          "dev-refresh-secret",
+        expiresIn:
+          this.configService.get<string>("JWT_REFRESH_EXPIRES_IN") ?? "30d",
       },
     );
-    const csrfToken = randomBytes(32).toString('hex');
+    const csrfToken = randomBytes(32).toString("hex");
 
     await this.persistRefreshToken(userId, refreshToken);
 
@@ -149,10 +157,14 @@ export class AuthService {
     return expiresAt;
   }
 
-  private async verifyRefreshToken(refreshToken: string): Promise<{ sub: string }> {
+  private async verifyRefreshToken(
+    refreshToken: string,
+  ): Promise<{ sub: string }> {
     try {
       return await this.jwtService.verifyAsync<{ sub: string }>(refreshToken, {
-        secret: this.configService.get<string>('JWT_REFRESH_SECRET') ?? 'dev-refresh-secret',
+        secret:
+          this.configService.get<string>("JWT_REFRESH_SECRET") ??
+          "dev-refresh-secret",
       });
     } catch {
       throw new UnauthorizedException(INVALID_TOKEN_MESSAGE);
@@ -168,9 +180,7 @@ export class AuthService {
             permissions: {
               include: {
                 permission: {
-                  include: {
-                    group: true,
-                  },
+                  select: { name: true },
                 },
               },
             },
@@ -190,23 +200,16 @@ export class AuthService {
         id: user.role.id,
         name: user.role.name,
         description: user.role.description,
-        permissions: user.role.permissions.map(({ permission }: any) => ({
-          id: permission.id,
-          name: permission.name,
-          description: permission.description,
-          group: {
-            id: permission.group.id,
-            name: permission.group.name,
-            description: permission.group.description,
-          },
-        })),
       },
-      permissions: user.role.permissions.map(({ permission }: any) => permission.name),
+      permissions: user.role.permissions.map(
+        ({ permission }: any) => permission.name,
+      ),
     };
   }
 
   private parseDurationToMilliseconds() {
-    const ttl = this.configService.get<string>('JWT_REFRESH_EXPIRES_IN') ?? '30d';
+    const ttl =
+      this.configService.get<string>("JWT_REFRESH_EXPIRES_IN") ?? "30d";
     const match = /^([0-9]+)([smhd])$/.exec(ttl);
 
     if (!match) {
@@ -216,15 +219,15 @@ export class AuthService {
     const value = Number.parseInt(match[1], 10);
     const unit = match[2];
 
-    if (unit === 's') {
+    if (unit === "s") {
       return value * 1000;
     }
 
-    if (unit === 'm') {
+    if (unit === "m") {
       return value * 60 * 1000;
     }
 
-    if (unit === 'h') {
+    if (unit === "h") {
       return value * 60 * 60 * 1000;
     }
 
