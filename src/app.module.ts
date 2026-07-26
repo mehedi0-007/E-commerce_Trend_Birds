@@ -10,9 +10,16 @@ import { PermissionsGuard } from "./common/guards/permissions.guard";
 import { PrismaModule } from "./prisma/prisma.module";
 
 import { PermissionsModule } from "./permissions/permissions.module";
+import { RolesModule } from "./roles/roles.module";
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }), PrismaModule, AuthModule, PermissionsModule],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    PrismaModule,
+    AuthModule,
+    PermissionsModule,
+    RolesModule,
+  ],
   controllers: [AppController],
   providers: [
     AppService,
