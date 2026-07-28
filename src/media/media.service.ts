@@ -185,17 +185,24 @@ export class MediaService {
   async remove(id: string) {
     const media = await this.findOne(id);
 
-    // Delete main file from disk
+    // Delete DB record first — if a foreign key constraint blocks this
+    // (e.g. a Category or Brand still references this media), we fail
+    // early without losing the file on disk.
+    await this.prisma.media.delete({
+      where: { id },
+    });
+
+    // Clean up main file from disk
     const filePath = path.join(this.uploadDir, media.fileName);
     if (fs.existsSync(filePath)) {
       try {
         await fs.promises.unlink(filePath);
       } catch (err) {
-        // Ignore file deletion error if missing
+        // Ignore — file may already be missing
       }
     }
 
-    // Delete thumbnail from disk if exists
+    // Clean up thumbnail from disk if exists
     if (media.thumbnailUrl && media.thumbnailUrl.includes("/thumbnails/")) {
       const thumbFileName = path.basename(media.thumbnailUrl);
       const thumbPath = path.join(this.thumbDir, thumbFileName);
@@ -207,10 +214,6 @@ export class MediaService {
         }
       }
     }
-
-    await this.prisma.media.delete({
-      where: { id },
-    });
 
     return { message: `Media asset "${media.originalName}" successfully deleted` };
   }
