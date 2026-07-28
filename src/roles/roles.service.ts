@@ -158,7 +158,7 @@ export class RolesService {
     });
 
     if (!role) {
-      throw new NotFoundException(`Role with ID "${id}" not found`);
+      throw new NotFoundException(`Role not found`);
     }
 
     if (dto.name && dto.name !== role.name) {

@@ -4,24 +4,37 @@ import {
   ExceptionFilter,
   HttpException,
   HttpStatus,
+  Logger,
 } from "@nestjs/common";
+import { Prisma } from "@prisma/client";
 import { Response } from "express";
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
+  private readonly logger = new Logger(AllExceptionsFilter.name);
+
   catch(exception: unknown, host: ArgumentsHost) {
     const context = host.switchToHttp();
     const response = context.getResponse<Response>();
 
-    const status =
-      exception instanceof HttpException
-        ? exception.getStatus()
-        : HttpStatus.INTERNAL_SERVER_ERROR;
-
+    let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let message: string | null = "Internal server error";
-    let errorDetail: any = null;
+    let errorDetail: any = "Internal server error";
 
-    if (exception instanceof HttpException) {
+    const isPrismaError =
+      exception instanceof Prisma.PrismaClientKnownRequestError ||
+      exception instanceof Prisma.PrismaClientUnknownRequestError ||
+      exception instanceof Prisma.PrismaClientRustPanicError ||
+      exception instanceof Prisma.PrismaClientInitializationError ||
+      exception instanceof Prisma.PrismaClientValidationError;
+
+    if (isPrismaError) {
+      this.logger.error("Database Exception Caught:", exception);
+      status = HttpStatus.INTERNAL_SERVER_ERROR;
+      message = "Internal server error";
+      errorDetail = "Internal server error";
+    } else if (exception instanceof HttpException) {
+      status = exception.getStatus();
       const res = exception.getResponse();
       if (typeof res === "string") {
         message = res;
@@ -38,15 +51,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
           message = exception.message;
           errorDetail = resObj;
         }
-      } else {
-        message = exception.message;
-        errorDetail = exception.message;
       }
     } else if (exception instanceof Error) {
-      message = exception.message;
-      errorDetail = exception.message;
-    } else {
-      errorDetail = message;
+      this.logger.error("Unhandled Exception Caught:", exception);
+      message = "Internal server error";
+      errorDetail = "Internal server error";
     }
 
     response.status(status).json({
