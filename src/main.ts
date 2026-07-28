@@ -1,5 +1,7 @@
 import "reflect-metadata";
 import cookieParser from "cookie-parser";
+import * as express from "express";
+import * as path from "path";
 import { ValidationPipe } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
@@ -12,6 +14,8 @@ async function bootstrap() {
     credentials: true,
   });
   app.use(cookieParser());
+  app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

@@ -62,3 +62,46 @@ model User {
     createdAt             DateTime  @default(now())
     updatedAt             DateTime  @updatedAt
 }
+
+model Media {
+    id           String     @id @default(cuid())
+    originalName String
+    fileName     String
+    mimeType     String
+    size         Int
+    url          String
+    thumbnailUrl String?
+    altText      String?
+    title        String?
+    categories   Category[]
+    brands       Brand[]
+    createdAt    DateTime   @default(now())
+    updatedAt    DateTime   @updatedAt
+}
+
+model Category {
+    id          String     @id @default(cuid())
+    name        String
+    slug        String     @unique
+    description String?
+    parentId    String?
+    parent      Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+    children    Category[] @relation("CategoryHierarchy")
+    imageId     String?
+    image       Media?     @relation(fields: [imageId], references: [id], onDelete: SetNull)
+    active      Boolean    @default(true)
+    createdAt   DateTime   @default(now())
+    updatedAt   DateTime   @updatedAt
+}
+
+model Brand {
+    id          String   @id @default(cuid())
+    name        String   @unique
+    slug        String   @unique
+    description String?
+    logoId      String?
+    logo        Media?   @relation(fields: [logoId], references: [id], onDelete: SetNull)
+    active      Boolean  @default(true)
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+}
