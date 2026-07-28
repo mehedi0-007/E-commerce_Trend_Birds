@@ -7,39 +7,47 @@ import {
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
 
-export interface ResponseEnvelope<T> {
+export interface ApiResponseEnvelope<T = any> {
   success: boolean;
-  message: string;
+  message: string | null;
   data: T | null;
+  timestamp: string;
 }
 
 @Injectable()
 export class TransformInterceptor<T>
-  implements NestInterceptor<T, ResponseEnvelope<T>>
+  implements NestInterceptor<T, ApiResponseEnvelope<T>>
 {
   intercept(
     context: ExecutionContext,
     next: CallHandler,
-  ): Observable<ResponseEnvelope<T>> {
+  ): Observable<ApiResponseEnvelope<T>> {
     return next.handle().pipe(
       map((res) => {
-        // If already in standard envelope format, return as is
+        // Pass-through if already wrapped with success and timestamp
         if (
           res &&
           typeof res === "object" &&
           "success" in res &&
-          "message" in res &&
-          "data" in res
+          "timestamp" in res
         ) {
           return res;
         }
 
-        let message = "Operation completed successfully";
-        let data = res;
+        let message: string | null = null;
+        let data: any = res;
 
         if (res && typeof res === "object" && !Array.isArray(res)) {
+          // If controller returns explicit message property
           if ("message" in res && typeof res.message === "string") {
             message = res.message;
+          }
+
+          // If controller returns explicit data property
+          if ("data" in res) {
+            data = res.data;
+          } else if ("message" in res) {
+            // If object has message but no explicit data property, check remaining fields
             const { message: _, ...rest } = res;
             data = Object.keys(rest).length > 0 ? rest : null;
           }
@@ -47,8 +55,9 @@ export class TransformInterceptor<T>
 
         return {
           success: true,
-          message,
+          message: message ?? "Operation completed successfully",
           data: data ?? null,
+          timestamp: new Date().toISOString(),
         };
       }),
     );
