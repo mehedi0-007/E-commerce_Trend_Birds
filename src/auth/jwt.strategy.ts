@@ -4,6 +4,7 @@ import { PassportStrategy } from "@nestjs/passport";
 import { ExtractJwt, Strategy } from "passport-jwt";
 import { AuthenticatedUser } from "../common/interfaces/authenticated-user.interface";
 import { PrismaService } from "../prisma/prisma.service";
+import { mapUserToAuthenticatedUser } from "./auth.utils";
 
 type JwtPayload = {
   sub: string;
@@ -47,23 +48,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       );
     }
 
-    return this.mapUser(user);
-  }
-
-  private mapUser(user: any): AuthenticatedUser {
-    return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      active: user.active,
-      role: {
-        id: user.role.id,
-        name: user.role.name,
-        description: user.role.description,
-      },
-      permissions: user.role.permissions.map(
-        ({ permission }: any) => permission.name,
-      ),
-    };
+    return mapUserToAuthenticatedUser(user);
   }
 }

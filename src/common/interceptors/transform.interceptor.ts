@@ -11,6 +11,7 @@ export interface ApiResponseEnvelope<T = any> {
   success: boolean;
   message: string | null;
   data: T | null;
+  meta?: any;
   timestamp: string;
 }
 
@@ -36,29 +37,41 @@ export class TransformInterceptor<T>
 
         let message: string | null = null;
         let data: any = res;
+        let meta: any = undefined;
 
         if (res && typeof res === "object" && !Array.isArray(res)) {
-          // If controller returns explicit message property
+          // Extract message if present
           if ("message" in res && typeof res.message === "string") {
             message = res.message;
           }
 
-          // If controller returns explicit data property
+          // Extract meta if present (for paginated results)
+          if ("meta" in res) {
+            meta = res.meta;
+          }
+
+          // Extract data if present
           if ("data" in res) {
             data = res.data;
           } else if ("message" in res) {
             // If object has message but no explicit data property, check remaining fields
-            const { message: _, ...rest } = res;
+            const { message: _, meta: __, ...rest } = res;
             data = Object.keys(rest).length > 0 ? rest : null;
           }
         }
 
-        return {
+        const envelope: ApiResponseEnvelope = {
           success: true,
           message: message ?? "Operation completed successfully",
           data: data ?? null,
           timestamp: new Date().toISOString(),
         };
+
+        if (meta !== undefined) {
+          envelope.meta = meta;
+        }
+
+        return envelope;
       }),
     );
   }

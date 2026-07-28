@@ -132,10 +132,10 @@ export class BrandsService {
     }
 
     let newSlug = brand.slug;
-    if (dto.slug || dto.name) {
+    if (dto.slug || (dto.name && dto.name !== brand.name)) {
       newSlug = dto.slug
         ? this.generateSlug(dto.slug)
-        : this.generateSlug(dto.name || brand.name);
+        : this.generateSlug(dto.name!);
 
       const existingSlug = await this.prisma.brand.findUnique({
         where: { slug: newSlug },

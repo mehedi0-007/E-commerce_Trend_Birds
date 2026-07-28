@@ -202,10 +202,10 @@ export class CategoriesService {
     const category = await this.findOne(id);
 
     let newSlug = category.slug;
-    if (dto.slug || dto.name) {
+    if (dto.slug || (dto.name && dto.name !== category.name)) {
       newSlug = dto.slug
         ? this.generateSlug(dto.slug)
-        : this.generateSlug(dto.name || category.name);
+        : this.generateSlug(dto.name!);
 
       if (await this.isSlugTaken(newSlug, id)) {
         throw new ConflictException(`Category with slug "${newSlug}" already exists`);

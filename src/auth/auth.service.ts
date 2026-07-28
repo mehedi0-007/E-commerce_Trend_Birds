@@ -6,6 +6,7 @@ import { randomBytes } from "crypto";
 import { AuthenticatedUser } from "../common/interfaces/authenticated-user.interface";
 import { PrismaService } from "../prisma/prisma.service";
 import { AuthResponse, TokenBundle } from "./auth.types";
+import { mapUserToAuthenticatedUser } from "./auth.utils";
 import { LoginDto } from "./dto/login.dto";
 
 const INVALID_CREDENTIALS_MESSAGE = "Invalid email or password";
@@ -191,20 +192,7 @@ export class AuthService {
   }
 
   private mapUser(user: any): AuthenticatedUser {
-    return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      active: user.active,
-      role: {
-        id: user.role.id,
-        name: user.role.name,
-        description: user.role.description,
-      },
-      permissions: user.role.permissions.map(
-        ({ permission }: any) => permission.name,
-      ),
-    };
+    return mapUserToAuthenticatedUser(user);
   }
 
   private parseDurationToMilliseconds() {

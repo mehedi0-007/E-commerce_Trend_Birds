@@ -106,11 +106,23 @@ export class MediaService {
     }
 
     const savedMedia = [];
-    for (const file of files) {
-      const media = await this.processAndSaveFile(file);
-      savedMedia.push(media);
+    try {
+      for (const file of files) {
+        const media = await this.processAndSaveFile(file);
+        savedMedia.push(media);
+      }
+      return savedMedia;
+    } catch (error) {
+      // Rollback: delete all media records & disk files created so far in this batch
+      for (const media of savedMedia) {
+        try {
+          await this.remove(media.id);
+        } catch {
+          // Ignore rollback errors
+        }
+      }
+      throw error;
     }
-    return savedMedia;
   }
 
   async findAll(query: {
