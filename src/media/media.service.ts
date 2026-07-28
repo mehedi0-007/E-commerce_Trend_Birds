@@ -22,7 +22,7 @@ const ALLOWED_MIME_TYPES = [
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 ];
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
 @Injectable()
 export class MediaService {
@@ -63,13 +63,11 @@ export class MediaService {
     const uniqueName = `${Date.now()}-${uuidv4()}${fileExt}`;
     const filePath = path.join(this.uploadDir, uniqueName);
 
-    // Save main file to disk
     await fs.promises.writeFile(filePath, file.buffer);
 
     const fileUrl = `/uploads/${uniqueName}`;
     let thumbnailUrl: string | null = null;
 
-    // Generate thumbnail if image
     if (file.mimetype.startsWith("image/") && file.mimetype !== "image/svg+xml") {
       try {
         const thumbName = `thumb-${uniqueName}`;
@@ -81,7 +79,6 @@ export class MediaService {
 
         thumbnailUrl = `/uploads/thumbnails/${thumbName}`;
       } catch (err) {
-        // Fallback if thumbnail creation fails
         thumbnailUrl = fileUrl;
       }
     }
@@ -113,12 +110,10 @@ export class MediaService {
       }
       return savedMedia;
     } catch (error) {
-      // Rollback: delete all media records & disk files created so far in this batch
       for (const media of savedMedia) {
         try {
           await this.remove(media.id);
         } catch {
-          // Ignore rollback errors
         }
       }
       throw error;
@@ -197,24 +192,18 @@ export class MediaService {
   async remove(id: string) {
     const media = await this.findOne(id);
 
-    // Delete DB record first — if a foreign key constraint blocks this
-    // (e.g. a Category or Brand still references this media), we fail
-    // early without losing the file on disk.
     await this.prisma.media.delete({
       where: { id },
     });
 
-    // Clean up main file from disk
     const filePath = path.join(this.uploadDir, media.fileName);
     if (fs.existsSync(filePath)) {
       try {
         await fs.promises.unlink(filePath);
       } catch (err) {
-        // Ignore — file may already be missing
       }
     }
 
-    // Clean up thumbnail from disk if exists
     if (media.thumbnailUrl && media.thumbnailUrl.includes("/thumbnails/")) {
       const thumbFileName = path.basename(media.thumbnailUrl);
       const thumbPath = path.join(this.thumbDir, thumbFileName);
@@ -222,7 +211,6 @@ export class MediaService {
         try {
           await fs.promises.unlink(thumbPath);
         } catch (err) {
-          // Ignore
         }
       }
     }

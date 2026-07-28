@@ -25,7 +25,7 @@ FROM node:alpine AS runner
 
 WORKDIR /app
 
-# Install OpenSSL for Prisma compatibility
+# Install OpenSSL for Prisma compatibility`
 RUN apk add --no-cache openssl
 
 COPY package*.json ./

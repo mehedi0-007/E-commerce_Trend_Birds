@@ -25,7 +25,6 @@ export class TransformInterceptor<T>
   ): Observable<ApiResponseEnvelope<T>> {
     return next.handle().pipe(
       map((res) => {
-        // Pass-through if already wrapped with success and timestamp
         if (
           res &&
           typeof res === "object" &&
@@ -40,21 +39,17 @@ export class TransformInterceptor<T>
         let meta: any = undefined;
 
         if (res && typeof res === "object" && !Array.isArray(res)) {
-          // Extract message if present
           if ("message" in res && typeof res.message === "string") {
             message = res.message;
           }
 
-          // Extract meta if present (for paginated results)
           if ("meta" in res) {
             meta = res.meta;
           }
 
-          // Extract data if present
           if ("data" in res) {
             data = res.data;
           } else if ("message" in res) {
-            // If object has message but no explicit data property, check remaining fields
             const { message: _, meta: __, ...rest } = res;
             data = Object.keys(rest).length > 0 ? rest : null;
           }

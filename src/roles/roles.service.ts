@@ -170,7 +170,6 @@ export class RolesService {
       }
     }
 
-    // Determine target permission IDs
     let targetPermissionIds: string[] | undefined = undefined;
     if (dto.grantAll) {
       const allPerms = await this.prisma.permission.findMany({
@@ -181,7 +180,6 @@ export class RolesService {
       targetPermissionIds = dto.permissionIds;
     }
 
-    // Self-lockout check for role:update
     if (targetPermissionIds !== undefined) {
       const isRoleUpdateRevoked = await this.wouldRevokeRoleUpdate(
         id,
@@ -267,7 +265,6 @@ export class RolesService {
       return false;
     }
 
-    // Find all active roles that currently have role:update
     const activeRolesWithPermission = await this.prisma.role.findMany({
       where: {
         active: true,
