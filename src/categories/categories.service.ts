@@ -154,27 +154,31 @@ export class CategoriesService {
   }
 
   async findTree() {
-    const fetchTreeNodes = async (parentId: string | null = null): Promise<any[]> => {
-      const categories = await this.prisma.category.findMany({
-        where: { parentId, active: true },
-        include: {
-          image: true,
-        },
-        orderBy: { name: "asc" },
-      });
+    const allCategories = await this.prisma.category.findMany({
+      where: { active: true },
+      include: {
+        image: true,
+      },
+      orderBy: { name: "asc" },
+    });
 
-      const result = [];
-      for (const cat of categories) {
-        const children = await fetchTreeNodes(cat.id);
-        result.push({
-          ...cat,
-          children,
-        });
+    const categoryMap = new Map<string, any>();
+    const rootNodes: any[] = [];
+
+    for (const cat of allCategories) {
+      categoryMap.set(cat.id, { ...cat, children: [] });
+    }
+
+    for (const cat of allCategories) {
+      const node = categoryMap.get(cat.id);
+      if (cat.parentId && categoryMap.has(cat.parentId)) {
+        categoryMap.get(cat.parentId).children.push(node);
+      } else {
+        rootNodes.push(node);
       }
-      return result;
-    };
+    }
 
-    return fetchTreeNodes(null);
+    return rootNodes;
   }
 
   async findOne(id: string) {
