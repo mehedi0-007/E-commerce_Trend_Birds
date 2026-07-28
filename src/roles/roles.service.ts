@@ -47,6 +47,7 @@ export class RolesService {
         skip,
         take: limit,
       }),
+      
       this.prisma.role.count({ where }),
     ]);
 
