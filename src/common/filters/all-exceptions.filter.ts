@@ -30,17 +30,20 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     if (isPrismaError) {
       this.logger.error("Database Exception Caught:", exception);
+      
       status = HttpStatus.INTERNAL_SERVER_ERROR;
       message = "Internal server error";
       errorDetail = "Internal server error";
     } else if (exception instanceof HttpException) {
       status = exception.getStatus();
       const res = exception.getResponse();
+
       if (typeof res === "string") {
         message = res;
         errorDetail = res;
       } else if (res && typeof res === "object") {
         const resObj = res as Record<string, any>;
+        
         if (Array.isArray(resObj.message)) {
           message = resObj.error || "Validation failed";
           errorDetail = resObj.message;

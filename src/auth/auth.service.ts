@@ -3,6 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { compare, hash } from "bcryptjs";
 import { randomBytes } from "crypto";
+import ms from "ms";
 import { AuthenticatedUser } from "../common/interfaces/authenticated-user.interface";
 import { PrismaService } from "../prisma/prisma.service";
 import { AuthResponse, TokenBundle } from "./auth.types";
@@ -195,30 +196,9 @@ export class AuthService {
     return mapUserToAuthenticatedUser(user);
   }
 
-  private parseDurationToMilliseconds() {
+  private parseDurationToMilliseconds(): number {
     const ttl =
       this.configService.get<string>("JWT_REFRESH_EXPIRES_IN") ?? "30d";
-    const match = /^([0-9]+)([smhd])$/.exec(ttl);
-
-    if (!match) {
-      return 30 * 24 * 60 * 60 * 1000;
-    }
-
-    const value = Number.parseInt(match[1], 10);
-    const unit = match[2];
-
-    if (unit === "s") {
-      return value * 1000;
-    }
-
-    if (unit === "m") {
-      return value * 60 * 1000;
-    }
-
-    if (unit === "h") {
-      return value * 60 * 60 * 1000;
-    }
-
-    return value * 24 * 60 * 60 * 1000;
+    return (ms(ttl as ms.StringValue) as number) || 30 * 24 * 60 * 60 * 1000;
   }
 }
