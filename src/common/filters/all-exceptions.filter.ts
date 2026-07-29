@@ -7,7 +7,7 @@ import {
   Logger,
 } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
-import { Response } from "express";
+import { Request, Response } from "express";
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -15,6 +15,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
   catch(exception: unknown, host: ArgumentsHost) {
     const context = host.switchToHttp();
+    const request = context.getRequest<Request>();
     const response = context.getResponse<Response>();
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
@@ -29,8 +30,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
       exception instanceof Prisma.PrismaClientValidationError;
 
     if (isPrismaError) {
-      this.logger.error("Database Exception Caught:", exception);
-      
+      this.logger.error(
+        `Database Exception Caught on [${request.method} ${request.url}]:`,
+        exception,
+      );
+
       status = HttpStatus.INTERNAL_SERVER_ERROR;
       message = "Internal server error";
       errorDetail = "Internal server error";
@@ -43,7 +47,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         errorDetail = res;
       } else if (res && typeof res === "object") {
         const resObj = res as Record<string, any>;
-        
+
         if (Array.isArray(resObj.message)) {
           message = resObj.error || "Validation failed";
           errorDetail = resObj.message;
@@ -55,8 +59,15 @@ export class AllExceptionsFilter implements ExceptionFilter {
           errorDetail = resObj;
         }
       }
+
+      this.logger.warn(
+        `HTTP ${status} Exception [${request.method} ${request.url}]: ${JSON.stringify(errorDetail)}`,
+      );
     } else if (exception instanceof Error) {
-      this.logger.error("Unhandled Exception Caught:", exception);
+      this.logger.error(
+        `Unhandled Exception Caught on [${request.method} ${request.url}]:`,
+        exception,
+      );
       message = "Internal server error";
       errorDetail = "Internal server error";
     }

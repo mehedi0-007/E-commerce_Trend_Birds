@@ -20,6 +20,7 @@ const MODULE_PERMISSIONS = [
     group: "Permissions",
     description: "Permission management module",
     permissions: [
+      { name: "permission:watch", description: "Watch permissions menu" },
       { name: "permission:read", description: "View permissions" },
       { name: "permission:create", description: "Create permission groups" },
       { name: "permission:update", description: "Update permission groups" },
@@ -30,6 +31,7 @@ const MODULE_PERMISSIONS = [
     group: "Roles",
     description: "Role management module",
     permissions: [
+      { name: "role:watch", description: "Watch roles menu" },
       { name: "role:read", description: "View roles" },
       { name: "role:create", description: "Create roles" },
       { name: "role:update", description: "Update roles" },
@@ -40,6 +42,7 @@ const MODULE_PERMISSIONS = [
     group: "Users",
     description: "User management module",
     permissions: [
+      { name: "user:watch", description: "Watch users menu" },
       { name: "user:read", description: "View users" },
       { name: "user:create", description: "Create user accounts" },
       { name: "user:update", description: "Update user accounts" },
@@ -50,8 +53,11 @@ const MODULE_PERMISSIONS = [
     group: "Media",
     description: "Media management module",
     permissions: [
+      { name: "media:watch", description: "Watch media menu" },
       { name: "media:read", description: "View media files" },
-      { name: "media:create", description: "Upload media files" },
+      { name: "media:upload", description: "Upload media files" },
+      { name: "media:create", description: "Create media records" },
+      { name: "media:write", description: "Write media metadata" },
       { name: "media:update", description: "Update media metadata" },
       { name: "media:delete", description: "Delete media files" },
     ],
@@ -60,6 +66,7 @@ const MODULE_PERMISSIONS = [
     group: "Category",
     description: "Category management module",
     permissions: [
+      { name: "category:watch", description: "Watch categories menu" },
       { name: "category:read", description: "View categories" },
       { name: "category:create", description: "Create categories" },
       { name: "category:update", description: "Update categories" },
@@ -70,6 +77,7 @@ const MODULE_PERMISSIONS = [
     group: "Brand",
     description: "Brand management module",
     permissions: [
+      { name: "brand:watch", description: "Watch brands menu" },
       { name: "brand:read", description: "View brands" },
       { name: "brand:create", description: "Create brands" },
       { name: "brand:update", description: "Update brands" },
@@ -80,6 +88,7 @@ const MODULE_PERMISSIONS = [
     group: "Attribute",
     description: "Attribute management module",
     permissions: [
+      { name: "attribute:watch", description: "Watch attributes menu" },
       { name: "attribute:read", description: "View product attributes" },
       { name: "attribute:create", description: "Create product attributes" },
       { name: "attribute:update", description: "Update product attributes" },
@@ -90,6 +99,7 @@ const MODULE_PERMISSIONS = [
     group: "Product",
     description: "Product management module",
     permissions: [
+      { name: "product:watch", description: "Watch products menu" },
       { name: "product:read", description: "View products" },
       { name: "product:create", description: "Create products" },
       { name: "product:update", description: "Update products" },
@@ -177,7 +187,9 @@ async function main() {
   const catalogPermissions = allCreatedPermissions.filter(
     (p) =>
       p.name === "dashboard:watch" ||
+      p.name === "category:watch" ||
       p.name === "category:read" ||
+      p.name === "product:watch" ||
       p.name === "product:read",
   );
 
