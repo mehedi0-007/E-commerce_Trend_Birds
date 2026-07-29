@@ -4,6 +4,7 @@ import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { AuthModule } from "./auth/auth.module";
+import { AttributesModule } from "./attributes/attributes.module";
 import { BrandsModule } from "./brands/brands.module";
 import { CategoriesModule } from "./categories/categories.module";
 import { AllExceptionsFilter } from "./common/filters/all-exceptions.filter";
@@ -14,6 +15,7 @@ import { TransformInterceptor } from "./common/interceptors/transform.intercepto
 import { MediaModule } from "./media/media.module";
 import { PermissionsModule } from "./permissions/permissions.module";
 import { PrismaModule } from "./prisma/prisma.module";
+import { ProductsModule } from "./products/products.module";
 import { RolesModule } from "./roles/roles.module";
 import { UsersModule } from "./users/users.module";
 
@@ -28,6 +30,8 @@ import { UsersModule } from "./users/users.module";
     MediaModule,
     CategoriesModule,
     BrandsModule,
+    AttributesModule,
+    ProductsModule,
   ],
   controllers: [AppController],
   providers: [

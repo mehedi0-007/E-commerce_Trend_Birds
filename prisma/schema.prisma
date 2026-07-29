@@ -64,44 +64,161 @@ model User {
 }
 
 model Media {
-    id           String     @id @default(cuid())
-    originalName String
-    fileName     String
-    mimeType     String
-    size         Int
-    url          String
-    thumbnailUrl String?
-    altText      String?
-    title        String?
-    categories   Category[]
-    brands       Brand[]
-    createdAt    DateTime   @default(now())
-    updatedAt    DateTime   @updatedAt
+    id                      String                   @id @default(cuid())
+    originalName            String
+    fileName                String
+    mimeType                String
+    size                    Int
+    url                     String
+    thumbnailUrl            String?
+    altText                 String?
+    title                   String?
+    categories              Category[]
+    brands                  Brand[]
+    productMediaAttachments ProductMediaAttachment[]
+    createdAt               DateTime                 @default(now())
+    updatedAt               DateTime                 @updatedAt
 }
 
 model Category {
-    id          String     @id @default(cuid())
-    name        String
-    slug        String     @unique
-    description String?
-    parentId    String?
-    parent      Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
-    children    Category[] @relation("CategoryHierarchy")
-    imageId     String?
-    image       Media?     @relation(fields: [imageId], references: [id], onDelete: SetNull)
-    active      Boolean    @default(true)
-    createdAt   DateTime   @default(now())
-    updatedAt   DateTime   @updatedAt
+    id                String            @id @default(cuid())
+    name              String
+    slug              String            @unique
+    description       String?
+    parentId          String?
+    parent            Category?         @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+    children          Category[]        @relation("CategoryHierarchy")
+    imageId           String?
+    image             Media?            @relation(fields: [imageId], references: [id], onDelete: SetNull)
+    active            Boolean           @default(true)
+    productCategories ProductCategory[]
+    createdAt         DateTime          @default(now())
+    updatedAt         DateTime          @updatedAt
 }
 
 model Brand {
-    id          String   @id @default(cuid())
-    name        String   @unique
-    slug        String   @unique
+    id          String    @id @default(cuid())
+    name        String    @unique
+    slug        String    @unique
     description String?
     logoId      String?
-    logo        Media?   @relation(fields: [logoId], references: [id], onDelete: SetNull)
-    active      Boolean  @default(true)
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt
+    logo        Media?    @relation(fields: [logoId], references: [id], onDelete: SetNull)
+    active      Boolean   @default(true)
+    products    Product[]
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime  @updatedAt
+}
+
+enum AttributeType {
+    dropdown
+    radio
+    checkbox
+    colour_swatch
+    image_swatch
+}
+
+model Attribute {
+    id        String           @id @default(cuid())
+    name      String           @unique
+    slug      String           @unique
+    type      AttributeType    @default(dropdown)
+    values    AttributeValue[]
+    createdAt DateTime         @default(now())
+    updatedAt DateTime         @updatedAt
+}
+
+model AttributeValue {
+    id              String                   @id @default(cuid())
+    attributeId     String
+    attribute       Attribute                @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+    value           String
+    slug            String
+    referenceValue  String?
+    productVariants ProductVariantAttribute[]
+    createdAt       DateTime                 @default(now())
+    updatedAt       DateTime                 @updatedAt
+
+    @@unique([attributeId, value])
+    @@unique([attributeId, slug])
+}
+
+enum StockStatus {
+    IN_STOCK
+    OUT_OF_STOCK
+    ON_BACKORDER
+}
+
+model Product {
+    id               String                   @id @default(cuid())
+    name             String
+    slug             String                   @unique
+    sku              String                   @unique
+    shortDescription String?
+    longDescription  String?
+    hasVariants      Boolean                  @default(false)
+    price            Float?
+    salePrice        Float?
+    stock            Int?
+    stockStatus      StockStatus              @default(IN_STOCK)
+    weight           Float?
+    active           Boolean                  @default(true)
+    featured         Boolean                  @default(false)
+    sortOrder        Int                      @default(0)
+    brandId          String?
+    brand            Brand?                   @relation(fields: [brandId], references: [id], onDelete: SetNull)
+    categories       ProductCategory[]
+    variants         ProductVariant[]
+    mediaAttachments ProductMediaAttachment[]
+    createdAt        DateTime                 @default(now())
+    updatedAt        DateTime                 @updatedAt
+}
+
+model ProductCategory {
+    productId  String
+    categoryId String
+    product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+    category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+    @@id([productId, categoryId])
+}
+
+model ProductVariant {
+    id                String                   @id @default(cuid())
+    productId         String
+    product           Product                  @relation(fields: [productId], references: [id], onDelete: Cascade)
+    sku               String                   @unique
+    price             Float
+    salePrice         Float?
+    stock             Int                      @default(0)
+    stockStatus       StockStatus              @default(IN_STOCK)
+    lowStockThreshold Int?                     @default(5)
+    weight            Float?
+    active            Boolean                  @default(true)
+    attributeValues   ProductVariantAttribute[]
+    mediaAttachments  ProductMediaAttachment[]
+    createdAt         DateTime                 @default(now())
+    updatedAt         DateTime                 @updatedAt
+}
+
+model ProductVariantAttribute {
+    variantId        String
+    attributeValueId String
+    variant          ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+    attributeValue   AttributeValue @relation(fields: [attributeValueId], references: [id], onDelete: Restrict)
+
+    @@id([variantId, attributeValueId])
+}
+
+model ProductMediaAttachment {
+    id          String          @id @default(cuid())
+    mediaId     String
+    media       Media           @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+    productId   String?
+    product     Product?        @relation(fields: [productId], references: [id], onDelete: Cascade)
+    variantId   String?
+    variant     ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
+    isThumbnail Boolean         @default(false)
+    isGallery   Boolean         @default(true)
+    sortOrder   Int             @default(0)
+    createdAt   DateTime        @default(now())
 }
