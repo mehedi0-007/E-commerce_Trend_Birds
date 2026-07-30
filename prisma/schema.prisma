@@ -35,6 +35,8 @@ model Permission {
     roles       RolePermission[]
     createdAt   DateTime         @default(now())
     updatedAt   DateTime         @updatedAt
+
+    @@index([groupId])
 }
 
 model RolePermission {
@@ -42,6 +44,7 @@ model RolePermission {
     permissionId String
     role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
     permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+    createdAt    DateTime   @default(now())
 
     @@id([roleId, permissionId])
 }
@@ -61,6 +64,8 @@ model User {
     role                  Role      @relation(fields: [roleId], references: [id], onDelete: Restrict)
     createdAt             DateTime  @default(now())
     updatedAt             DateTime  @updatedAt
+
+    @@index([roleId])
 }
 
 model Media {
@@ -94,6 +99,9 @@ model Category {
     productCategories ProductCategory[]
     createdAt         DateTime          @default(now())
     updatedAt         DateTime          @updatedAt
+
+    @@index([parentId])
+    @@index([imageId])
 }
 
 model Brand {
@@ -107,6 +115,8 @@ model Brand {
     products    Product[]
     createdAt   DateTime  @default(now())
     updatedAt   DateTime  @updatedAt
+
+    @@index([logoId])
 }
 
 enum AttributeType {
@@ -171,6 +181,8 @@ model Product {
     mediaAttachments ProductMediaAttachment[]
     createdAt        DateTime                 @default(now())
     updatedAt        DateTime                 @updatedAt
+
+    @@index([brandId])
 }
 
 model ProductCategory {
@@ -178,6 +190,7 @@ model ProductCategory {
     categoryId String
     product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
     category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+    createdAt  DateTime @default(now())
 
     @@id([productId, categoryId])
 }
@@ -198,6 +211,8 @@ model ProductVariant {
     mediaAttachments  ProductMediaAttachment[]
     createdAt         DateTime                 @default(now())
     updatedAt         DateTime                 @updatedAt
+
+    @@index([productId])
 }
 
 model ProductVariantAttribute {
@@ -205,6 +220,7 @@ model ProductVariantAttribute {
     attributeValueId String
     variant          ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
     attributeValue   AttributeValue @relation(fields: [attributeValueId], references: [id], onDelete: Restrict)
+    createdAt        DateTime       @default(now())
 
     @@id([variantId, attributeValueId])
 }
@@ -221,4 +237,9 @@ model ProductMediaAttachment {
     isGallery   Boolean         @default(true)
     sortOrder   Int             @default(0)
     createdAt   DateTime        @default(now())
+    updatedAt   DateTime        @updatedAt
+
+    @@index([productId])
+    @@index([variantId])
+    @@index([mediaId])
 }
