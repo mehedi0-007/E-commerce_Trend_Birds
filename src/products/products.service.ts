@@ -199,6 +199,17 @@ export class ProductsService {
             );
           }
 
+          if (mediaAtt.attributeValueId) {
+            const attrValExists = await tx.attributeValue.findUnique({
+              where: { id: mediaAtt.attributeValueId },
+            });
+            if (!attrValExists) {
+              throw new NotFoundException(
+                `Attribute value with ID "${mediaAtt.attributeValueId}" not found`,
+              );
+            }
+          }
+
           await tx.productMediaAttachment.create({
             data: {
               productId: product.id,
@@ -206,6 +217,7 @@ export class ProductsService {
               isThumbnail: mediaAtt.isThumbnail || false,
               isGallery: mediaAtt.isGallery !== undefined ? mediaAtt.isGallery : true,
               sortOrder: mediaAtt.sortOrder || 0,
+              attributeValueId: mediaAtt.attributeValueId || null,
             },
           });
         }
@@ -250,6 +262,17 @@ export class ProductsService {
                 );
               }
 
+              if (mediaAtt.attributeValueId) {
+                const attrValExists = await tx.attributeValue.findUnique({
+                  where: { id: mediaAtt.attributeValueId },
+                });
+                if (!attrValExists) {
+                  throw new NotFoundException(
+                    `Attribute value with ID "${mediaAtt.attributeValueId}" not found`,
+                  );
+                }
+              }
+
               await tx.productMediaAttachment.create({
                 data: {
                   variantId: variant.id,
@@ -257,6 +280,7 @@ export class ProductsService {
                   isThumbnail: mediaAtt.isThumbnail || false,
                   isGallery: mediaAtt.isGallery !== undefined ? mediaAtt.isGallery : true,
                   sortOrder: mediaAtt.sortOrder || 0,
+                  attributeValueId: mediaAtt.attributeValueId || null,
                 },
               });
             }

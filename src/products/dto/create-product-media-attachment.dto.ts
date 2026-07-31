@@ -17,4 +17,8 @@ export class CreateProductMediaAttachmentDto {
   @Min(0)
   @IsOptional()
   sortOrder?: number;
+
+  @IsString()
+  @IsOptional()
+  attributeValueId?: string;
 }

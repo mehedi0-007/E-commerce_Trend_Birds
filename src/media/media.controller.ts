@@ -12,6 +12,8 @@ import {
   UseInterceptors,
 } from "@nestjs/common";
 import { FileInterceptor, FilesInterceptor } from "@nestjs/platform-express";
+import { CurrentUser } from "../common/decorators/current-user.decorator";
+import { AuthenticatedUser } from "../common/interfaces/authenticated-user.interface";
 import { Permissions } from "../common/decorators/permissions.decorator";
 import { UpdateMediaDto } from "./dto/update-media.dto";
 import { MediaService } from "./media.service";
@@ -24,18 +26,22 @@ export class MediaController {
   @Permissions("media:create")
   @UseInterceptors(FileInterceptor("file"))
   async uploadFile(
+    @CurrentUser() user: AuthenticatedUser,
     @UploadedFile() file: Express.Multer.File,
     @Body("altText") altText?: string,
     @Body("title") title?: string,
   ) {
-    return this.mediaService.processAndSaveFile(file, altText, title);
+    return this.mediaService.processAndSaveFile(file, altText, title, user.id);
   }
 
   @Post("upload-multiple")
   @Permissions("media:create")
   @UseInterceptors(FilesInterceptor("files", 10))
-  async uploadMultipleFiles(@UploadedFiles() files: Express.Multer.File[]) {
-    return this.mediaService.uploadMultiple(files);
+  async uploadMultipleFiles(
+    @CurrentUser() user: AuthenticatedUser,
+    @UploadedFiles() files: Express.Multer.File[]
+  ) {
+    return this.mediaService.uploadMultiple(files, user.id);
   }
 
   @Get()

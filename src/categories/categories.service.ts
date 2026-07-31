@@ -90,6 +90,7 @@ export class CategoriesService {
         parentId: dto.parentId || null,
         imageId: dto.imageId || null,
         active: dto.active ?? true,
+        sortOrder: dto.sortOrder || 0,
       },
       include: {
         parent: { select: { id: true, name: true, slug: true } },
@@ -238,6 +239,7 @@ export class CategoriesService {
         ...(dto.parentId !== undefined && { parentId: dto.parentId }),
         ...(dto.imageId !== undefined && { imageId: dto.imageId }),
         ...(dto.active !== undefined && { active: dto.active }),
+        ...(dto.sortOrder !== undefined && { sortOrder: dto.sortOrder }),
       },
       include: {
         parent: { select: { id: true, name: true, slug: true } },

@@ -62,6 +62,7 @@ model User {
     active                Boolean   @default(true)
     roleId                String
     role                  Role      @relation(fields: [roleId], references: [id], onDelete: Restrict)
+    uploadedMedia         Media[]
     createdAt             DateTime  @default(now())
     updatedAt             DateTime  @updatedAt
 
@@ -73,16 +74,23 @@ model Media {
     originalName            String
     fileName                String
     mimeType                String
+    type                    String?
     size                    Int
+    width                   Int?
+    height                  Int?
     url                     String
     thumbnailUrl            String?
     altText                 String?
     title                   String?
+    uploadedById            String?
+    uploadedBy              User?                    @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
     categories              Category[]
     brands                  Brand[]
     productMediaAttachments ProductMediaAttachment[]
     createdAt               DateTime                 @default(now())
     updatedAt               DateTime                 @updatedAt
+
+    @@index([uploadedById])
 }
 
 model Category {
@@ -96,6 +104,7 @@ model Category {
     imageId           String?
     image             Media?            @relation(fields: [imageId], references: [id], onDelete: SetNull)
     active            Boolean           @default(true)
+    sortOrder         Int               @default(0)
     productCategories ProductCategory[]
     createdAt         DateTime          @default(now())
     updatedAt         DateTime          @updatedAt
@@ -144,9 +153,10 @@ model AttributeValue {
     value           String
     slug            String
     referenceValue  String?
-    productVariants ProductVariantAttribute[]
-    createdAt       DateTime                 @default(now())
-    updatedAt       DateTime                 @updatedAt
+    productVariants         ProductVariantAttribute[]
+    productMediaAttachments ProductMediaAttachment[]
+    createdAt               DateTime                 @default(now())
+    updatedAt               DateTime                 @updatedAt
 
     @@unique([attributeId, value])
     @@unique([attributeId, slug])
@@ -231,9 +241,11 @@ model ProductMediaAttachment {
     media       Media           @relation(fields: [mediaId], references: [id], onDelete: Cascade)
     productId   String?
     product     Product?        @relation(fields: [productId], references: [id], onDelete: Cascade)
-    variantId   String?
-    variant     ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
-    isThumbnail Boolean         @default(false)
+    variantId        String?
+    variant          ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
+    attributeValueId String?
+    attributeValue   AttributeValue? @relation(fields: [attributeValueId], references: [id], onDelete: Cascade)
+    isThumbnail      Boolean         @default(false)
     isGallery   Boolean         @default(true)
     sortOrder   Int             @default(0)
     createdAt   DateTime        @default(now())
@@ -241,5 +253,6 @@ model ProductMediaAttachment {
 
     @@index([productId])
     @@index([variantId])
+    @@index([attributeValueId])
     @@index([mediaId])
 }

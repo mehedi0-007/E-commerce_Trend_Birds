@@ -42,7 +42,12 @@ export class MediaService {
     }
   }
 
-  async processAndSaveFile(file: Express.Multer.File, altText?: string, title?: string) {
+  async processAndSaveFile(
+    file: Express.Multer.File,
+    altText?: string,
+    title?: string,
+    uploadedById?: string
+  ) {
     if (!file) {
       throw new BadRequestException("No file provided");
     }
@@ -67,20 +72,34 @@ export class MediaService {
 
     const fileUrl = `/uploads/${uniqueName}`;
     let thumbnailUrl: string | null = null;
+    let width: number | null = null;
+    let height: number | null = null;
+    let type: string | null = null;
 
-    if (file.mimetype.startsWith("image/") && file.mimetype !== "image/svg+xml") {
-      try {
-        const thumbName = `thumb-${uniqueName}`;
-        const thumbPath = path.join(this.thumbDir, thumbName);
+    if (file.mimetype.startsWith("image/")) {
+      type = "image";
+      if (file.mimetype !== "image/svg+xml") {
+        try {
+          const metadata = await sharp(file.buffer).metadata();
+          width = metadata.width || null;
+          height = metadata.height || null;
 
-        await sharp(file.buffer)
-          .resize(300, 300, { fit: "cover" })
-          .toFile(thumbPath);
+          const thumbName = `thumb-${uniqueName}`;
+          const thumbPath = path.join(this.thumbDir, thumbName);
 
-        thumbnailUrl = `/uploads/thumbnails/${thumbName}`;
-      } catch (err) {
-        thumbnailUrl = fileUrl;
+          await sharp(file.buffer)
+            .resize(300, 300, { fit: "cover" })
+            .toFile(thumbPath);
+
+          thumbnailUrl = `/uploads/thumbnails/${thumbName}`;
+        } catch (err) {
+          thumbnailUrl = fileUrl;
+        }
       }
+    } else if (file.mimetype.startsWith("video/")) {
+      type = "video";
+    } else {
+      type = "document";
     }
 
     return this.prisma.media.create({
@@ -88,16 +107,20 @@ export class MediaService {
         originalName: file.originalname,
         fileName: uniqueName,
         mimeType: file.mimetype,
+        type,
         size: file.size,
+        width,
+        height,
         url: fileUrl,
         thumbnailUrl,
         altText: altText || null,
         title: title || file.originalname,
+        uploadedById: uploadedById || null,
       },
     });
   }
 
-  async uploadMultiple(files: Express.Multer.File[]) {
+  async uploadMultiple(files: Express.Multer.File[], uploadedById?: string) {
     if (!files || files.length === 0) {
       throw new BadRequestException("No files uploaded");
     }
@@ -105,7 +128,7 @@ export class MediaService {
     const savedMedia = [];
     try {
       for (const file of files) {
-        const media = await this.processAndSaveFile(file);
+        const media = await this.processAndSaveFile(file, undefined, undefined, uploadedById);
         savedMedia.push(media);
       }
       return savedMedia;
