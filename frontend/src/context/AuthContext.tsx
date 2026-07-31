@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { apiClient, setCsrfToken } from '../api/client';
+import { apiClient, setAccessToken, setCsrfToken } from '../api/client';
 
 export interface UserRole {
   id: string;
@@ -69,6 +69,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const response = await apiClient.post('/auth/login', { email, password });
       const payload = response.data?.data || response.data;
+      if (payload?.accessToken) {
+        setAccessToken(payload.accessToken);
+      }
       if (payload?.csrfToken) {
         setCsrfToken(payload.csrfToken);
       }
@@ -86,6 +89,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch {
     } finally {
       setUser(null);
+      setAccessToken(null);
       setCsrfToken(null);
     }
   };

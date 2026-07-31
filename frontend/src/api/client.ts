@@ -11,14 +11,37 @@ export const apiClient = axios.create({
   },
 });
 
+let accessToken: string | null = null;
 let csrfToken: string | null = null;
+
+export const setAccessToken = (token: string | null) => {
+  accessToken = token;
+};
+
+export const getAccessToken = () => accessToken;
+
 export const setCsrfToken = (token: string | null) => {
   csrfToken = token;
 };
 
+export const getCsrfToken = () => csrfToken;
+
+function getCookie(name: string): string | null {
+  if (typeof document === 'undefined') return null;
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+  return null;
+}
+
 apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  if (csrfToken && config.headers) {
-    config.headers['x-csrf-token'] = csrfToken;
+  if (accessToken && config.headers) {
+    config.headers['Authorization'] = `Bearer ${accessToken}`;
+  }
+
+  const csrf = csrfToken || getCookie('csrf_token');
+  if (csrf && config.headers) {
+    config.headers['x-csrf-token'] = csrf;
   }
   return config;
 });
@@ -42,6 +65,10 @@ const processQueue = (error: Error | null = null) => {
 
 apiClient.interceptors.response.use(
   (response) => {
+    const token = response.data?.data?.accessToken || response.data?.accessToken;
+    if (token) {
+      setAccessToken(token);
+    }
     const csrf = response.data?.data?.csrfToken || response.data?.csrfToken;
     if (csrf) {
       setCsrfToken(csrf);
@@ -72,21 +99,35 @@ apiClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
+        const currentCsrf = csrfToken || getCookie('csrf_token');
         const refreshResponse = await axios.post(
           `${API_BASE}/auth/refresh`,
           {},
-          { withCredentials: true }
+          {
+            headers: currentCsrf ? { 'x-csrf-token': currentCsrf } : {},
+            withCredentials: true,
+          }
         );
 
-        const refreshCsrf = refreshResponse.data?.data?.csrfToken || refreshResponse.data?.csrfToken;
-        if (refreshCsrf) {
-          setCsrfToken(refreshCsrf);
+        const newAccessToken = refreshResponse.data?.data?.accessToken || refreshResponse.data?.accessToken;
+        const newCsrf = refreshResponse.data?.data?.csrfToken || refreshResponse.data?.csrfToken;
+
+        if (newAccessToken) {
+          setAccessToken(newAccessToken);
+        }
+        if (newCsrf) {
+          setCsrfToken(newCsrf);
+        }
+
+        if (newAccessToken && originalRequest.headers) {
+          originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
         }
 
         processQueue(null);
         return apiClient(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError as Error);
+        setAccessToken(null);
         setCsrfToken(null);
         if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
           window.location.href = '/login';
