@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { apiClient } from '../api/client';
-import { Sliders, Plus, Edit2, Trash2, X, AlertCircle, Tag } from 'lucide-react';
+import { Sliders, Plus, Edit2, Trash2, X, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 interface AttributeValue {

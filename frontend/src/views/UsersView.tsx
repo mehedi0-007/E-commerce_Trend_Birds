@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { apiClient } from '../api/client';
-import { Plus, Edit2, Trash2, Search, Filter, X, AlertCircle, UserCheck } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, X, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 interface User {
@@ -276,6 +276,29 @@ export const UsersView: React.FC = () => {
           </table>
         </div>
       )}
+
+      {/* Pagination Controls */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem' }}>
+        <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+          Page {page} of {totalPages}
+        </span>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button
+            className="btn btn-secondary btn-sm"
+            disabled={page <= 1}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+          >
+            Previous
+          </button>
+          <button
+            className="btn btn-secondary btn-sm"
+            disabled={page >= totalPages}
+            onClick={() => setPage((p) => p + 1)}
+          >
+            Next
+          </button>
+        </div>
+      </div>
 
       {/* Form Modal */}
       {showModal && (

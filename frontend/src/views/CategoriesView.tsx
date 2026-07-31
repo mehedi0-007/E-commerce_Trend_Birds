@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { apiClient } from '../api/client';
 import { FolderTree, Plus, Edit2, Trash2, ChevronRight, X, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { MediaAsset } from './MediaView';
+import type { MediaAsset } from './MediaView';
 
 interface CategoryNode {
   id: string;

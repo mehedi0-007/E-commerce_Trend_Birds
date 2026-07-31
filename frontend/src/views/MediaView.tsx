@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { apiClient } from '../api/client';
-import { Upload, Image as ImageIcon, FileText, Video, Trash2, Edit2, X, AlertCircle } from 'lucide-react';
+import { Upload, FileText, Trash2, Edit2, X, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export interface MediaAsset {
