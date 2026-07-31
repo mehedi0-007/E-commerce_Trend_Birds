@@ -1,7 +1,6 @@
 services:
   # =========================================================================
-  # LOCAL POSTGRES SERVICE
-  # If using Cloud DB (NeonDB/Supabase), comment out lines 6-22 AND lines 34-42 below
+  # 1. LOCAL POSTGRES DATABASE
   # =========================================================================
   postgres:
     image: postgres:16-alpine
@@ -21,6 +20,9 @@ services:
       timeout: 5s
       retries: 5
 
+  # =========================================================================
+  # 2. NESTJS BACKEND API MODULE
+  # =========================================================================
   api:
     build:
       context: .
@@ -36,6 +38,20 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+
+  # =========================================================================
+  # 3. REACT + VITE FRONTEND DASHBOARD (Nginx Reverse Proxy)
+  # =========================================================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: trends-bird-frontend
+    restart: unless-stopped
+    ports:
+      - "5173:80"
+    depends_on:
+      - api
 
 volumes:
   postgres-data:
