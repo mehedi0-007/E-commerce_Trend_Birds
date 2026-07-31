@@ -46,7 +46,7 @@ export class UsersController {
     return this.usersService.create(dto);
   }
 
-  @Put(":id")
+  @Patch(":id")
   @Permissions("user:update")
   @ApiOperation({ summary: "Update User Details & Role" })
   update(

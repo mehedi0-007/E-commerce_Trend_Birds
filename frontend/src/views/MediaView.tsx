@@ -24,9 +24,13 @@ export const MediaView: React.FC = () => {
   const [mediaList, setMediaList] = useState<MediaAsset[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Filters & Upload Modal
+  // Search, Filters & Pagination
   const [search, setSearch] = useState('');
   const [mimeTypeFilter, setMimeTypeFilter] = useState('');
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  // Upload Modal
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
@@ -41,12 +45,14 @@ export const MediaView: React.FC = () => {
     setIsLoading(true);
     try {
       const params = new URLSearchParams();
-      params.append('limit', '50');
+      params.append('page', page.toString());
+      params.append('limit', '20');
       if (search) params.append('search', search);
       if (mimeTypeFilter) params.append('mimeType', mimeTypeFilter);
 
       const res = await apiClient.get(`/media?${params.toString()}`);
       setMediaList(res.data.data || []);
+      setTotalPages(res.data.meta?.totalPages || 1);
     } catch {
     } finally {
       setIsLoading(false);
@@ -55,7 +61,7 @@ export const MediaView: React.FC = () => {
 
   useEffect(() => {
     fetchMedia();
-  }, [search, mimeTypeFilter]);
+  }, [page, search, mimeTypeFilter]);
 
   const handleUploadSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,7 +79,7 @@ export const MediaView: React.FC = () => {
       }
     }
 
-    const endpoint = selectedFiles.length === 1 ? '/media/upload' : '/media/upload/multiple';
+    const endpoint = selectedFiles.length === 1 ? '/media/upload' : '/media/upload-multiple';
 
     try {
       await apiClient.post(endpoint, formData, {
@@ -101,7 +107,7 @@ export const MediaView: React.FC = () => {
     if (!editingMedia) return;
 
     try {
-      await apiClient.patch(`/media/${editingMedia.id}`, { altText, title });
+      await apiClient.put(`/media/${editingMedia.id}`, { altText, title });
       setEditingMedia(null);
       fetchMedia();
     } catch (err: any) {
@@ -136,7 +142,7 @@ export const MediaView: React.FC = () => {
           </p>
         </div>
 
-        {hasPermission('media:upload') && (
+        {hasPermission('media:create') && (
           <button className="btn btn-primary" onClick={() => setShowUploadModal(true)}>
             <Upload size={18} /> Upload Files
           </button>
@@ -158,13 +164,19 @@ export const MediaView: React.FC = () => {
           className="form-control"
           placeholder="Search assets by title or filename..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(1);
+          }}
         />
 
         <select
           className="form-control"
           value={mimeTypeFilter}
-          onChange={(e) => setMimeTypeFilter(e.target.value)}
+          onChange={(e) => {
+            setMimeTypeFilter(e.target.value);
+            setPage(1);
+          }}
         >
           <option value="">All Asset Types</option>
           <option value="image">Images Only</option>
@@ -240,7 +252,7 @@ export const MediaView: React.FC = () => {
               </div>
 
               <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.75rem', paddingTop: '0.5rem', borderTop: '1px solid var(--border-color)' }}>
-                {hasPermission('media:update') || hasPermission('media:write') ? (
+                {hasPermission('media:update') ? (
                   <button
                     className="btn btn-secondary btn-sm"
                     style={{ flex: 1 }}
@@ -268,6 +280,29 @@ export const MediaView: React.FC = () => {
           ))}
         </div>
       )}
+
+      {/* Pagination Controls */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.5rem' }}>
+        <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+          Page {page} of {totalPages}
+        </span>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button
+            className="btn btn-secondary btn-sm"
+            disabled={page <= 1}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+          >
+            Previous
+          </button>
+          <button
+            className="btn btn-secondary btn-sm"
+            disabled={page >= totalPages}
+            onClick={() => setPage((p) => p + 1)}
+          >
+            Next
+          </button>
+        </div>
+      </div>
 
       {/* Upload Modal */}
       {showUploadModal && (

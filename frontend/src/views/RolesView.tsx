@@ -70,7 +70,7 @@ export const RolesView: React.FC = () => {
     setIsSubmitting(true);
     try {
       const res = await apiClient.get(`/roles/${role.id}`);
-      const detailedRole = res.data;
+      const detailedRole = res.data?.data || res.data;
       setEditingRole(detailedRole);
       setRoleName(detailedRole.name);
       setDescription(detailedRole.description || '');

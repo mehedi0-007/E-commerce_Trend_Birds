@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Put,
   Query,
@@ -43,7 +44,7 @@ export class RolesController {
     return this.rolesService.create(dto);
   }
 
-  @Put(":id")
+  @Patch(":id")
   @Permissions("role:update")
   @ApiOperation({ summary: "Update Role & Permission Matrix Bindings" })
   update(@Param("id") id: string, @Body() dto: UpdateRoleDto) {
