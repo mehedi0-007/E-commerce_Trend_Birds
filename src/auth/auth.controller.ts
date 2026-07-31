@@ -119,6 +119,7 @@ export class AuthController {
       refreshToken,
       this.sessionCookieOptions(),
     );
+
     response.cookie(
       CSRF_COOKIE_NAME,
       csrfToken,

@@ -39,6 +39,7 @@ export class RolesController {
   @Permissions("role:create")
   @ApiOperation({ summary: "Create Role with Permission Matrix Bindings" })
   create(@Body() dto: CreateRoleDto) {
+    console.log(dto);
     return this.rolesService.create(dto);
   }
 
