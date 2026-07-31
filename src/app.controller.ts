@@ -1,5 +1,5 @@
 import { Controller, Get } from "@nestjs/common";
-import { ApiTags, ApiOperation } from "@nestjs/swagger";
+import { ApiTags, ApiOperation, ApiBearerAuth } from "@nestjs/swagger";
 import { AppService } from "./app.service";
 import { Public } from "./common/decorators/public.decorator";
 import { Permissions } from "./common/decorators/permissions.decorator";
@@ -17,6 +17,7 @@ export class AppController {
   }
 
   @Get("dashboard")
+  @ApiBearerAuth()
   @Permissions("dashboard:watch")
   @ApiOperation({ summary: "Dashboard Overview Metrics" })
   dashboard() {
