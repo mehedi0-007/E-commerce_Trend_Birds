@@ -1,0 +1,137 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Trends Bird Admin API",
+    "description": "API collection for Trends Bird Limited Backend Intern Assignment. Covers Authentication, RBAC Permissions, Roles, Users, Media Asset Manager, Category Tree Taxonomy, Brand Directory, Attribute Management, and Tabbed Product Engine.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/api",
+      "description": "Local Backend Server"
+    }
+  ],
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "summary": "User Login",
+        "tags": ["Auth"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string", "example": "admin@example.com" },
+                  "password": { "type": "string", "example": "Admin123!" }
+                },
+                "required": ["email", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Successfully authenticated with JWT access token and HTTP-only refresh cookie." },
+          "401": { "description": "Invalid credentials." }
+        }
+      }
+    },
+    "/auth/session": {
+      "get": {
+        "summary": "Get Active Session Profile & Permissions",
+        "tags": ["Auth"],
+        "responses": {
+          "200": { "description": "Returns current user account, role, and permission array." },
+          "401": { "description": "Unauthenticated or session expired." }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "summary": "Refresh Access Token",
+        "tags": ["Auth"],
+        "responses": {
+          "200": { "description": "Rotates refresh token cookie and issues new access token." }
+        }
+      }
+    },
+    "/permissions": {
+      "get": {
+        "summary": "List Permission Groups & Actions",
+        "tags": ["Permissions"],
+        "responses": {
+          "200": { "description": "List of permission groups with actions." }
+        }
+      }
+    },
+    "/roles": {
+      "get": {
+        "summary": "List Roles",
+        "tags": ["Roles"],
+        "responses": {
+          "200": { "description": "List of system roles with permission bindings." }
+        }
+      },
+      "post": {
+        "summary": "Create Role with Permission Matrix",
+        "tags": ["Roles"],
+        "responses": {
+          "201": { "description": "Role created successfully." }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "summary": "List Users (Paginated & Filterable)",
+        "tags": ["Users"],
+        "responses": {
+          "200": { "description": "Paginated user table." }
+        }
+      }
+    },
+    "/categories/tree": {
+      "get": {
+        "summary": "Get Visual Category Hierarchy Tree",
+        "tags": ["Categories"],
+        "responses": {
+          "200": { "description": "Nested category tree." }
+        }
+      }
+    },
+    "/brands": {
+      "get": {
+        "summary": "List Brands",
+        "tags": ["Brands"],
+        "responses": {
+          "200": { "description": "Brand list." }
+        }
+      }
+    },
+    "/attributes": {
+      "get": {
+        "summary": "List Product Attributes & Values",
+        "tags": ["Attributes"],
+        "responses": {
+          "200": { "description": "Attributes list." }
+        }
+      }
+    },
+    "/products": {
+      "get": {
+        "summary": "List Products Catalog",
+        "tags": ["Products"],
+        "responses": {
+          "200": { "description": "Paginated products list." }
+        }
+      },
+      "post": {
+        "summary": "Create Product with Variants, Taxonomy & Media",
+        "tags": ["Products"],
+        "responses": {
+          "201": { "description": "Product created successfully." }
+        }
+      }
+    }
+  }
+}
