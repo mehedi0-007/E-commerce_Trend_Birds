@@ -37,10 +37,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<AuthenticatedUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const normalizeUser = (userData: any): AuthenticatedUser => {
+    return {
+      ...userData,
+      userPermissions: userData.userPermissions || userData.permissions || [],
+    };
+  };
+
   const fetchSession = async () => {
     try {
-      const response = await apiClient.get<{ user: AuthenticatedUser }>('/auth/session');
-      setUser(response.data.user);
+      const response = await apiClient.get('/auth/session');
+      const payload = response.data?.data || response.data;
+      if (payload?.user) {
+        setUser(normalizeUser(payload.user));
+      } else {
+        setUser(null);
+      }
     } catch {
       setUser(null);
     } finally {
@@ -56,10 +68,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     try {
       const response = await apiClient.post('/auth/login', { email, password });
-      if (response.data.csrfToken) {
-        setCsrfToken(response.data.csrfToken);
+      const payload = response.data?.data || response.data;
+      if (payload?.csrfToken) {
+        setCsrfToken(payload.csrfToken);
       }
-      setUser(response.data.user);
+      if (payload?.user) {
+        setUser(normalizeUser(payload.user));
+      }
     } finally {
       setIsLoading(false);
     }

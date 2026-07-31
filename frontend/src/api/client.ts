@@ -42,8 +42,9 @@ const processQueue = (error: Error | null = null) => {
 
 apiClient.interceptors.response.use(
   (response) => {
-    if (response.data?.csrfToken) {
-      setCsrfToken(response.data.csrfToken);
+    const csrf = response.data?.data?.csrfToken || response.data?.csrfToken;
+    if (csrf) {
+      setCsrfToken(csrf);
     }
     return response;
   },
@@ -77,8 +78,9 @@ apiClient.interceptors.response.use(
           { withCredentials: true }
         );
 
-        if (refreshResponse.data?.csrfToken) {
-          setCsrfToken(refreshResponse.data.csrfToken);
+        const refreshCsrf = refreshResponse.data?.data?.csrfToken || refreshResponse.data?.csrfToken;
+        if (refreshCsrf) {
+          setCsrfToken(refreshCsrf);
         }
 
         processQueue(null);
