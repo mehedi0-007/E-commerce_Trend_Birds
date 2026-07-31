@@ -104,7 +104,7 @@ export class AuthController {
     }
 
     response.clearCookie(REFRESH_COOKIE_NAME, this.sessionCookieOptions());
-    response.clearCookie(CSRF_COOKIE_NAME, this.sessionCookieOptions(false));
+    response.clearCookie(CSRF_COOKIE_NAME, { ...this.sessionCookieOptions(false), path: "/" });
 
     return { message: "Logged out" };
   }
@@ -122,7 +122,7 @@ export class AuthController {
     response.cookie(
       CSRF_COOKIE_NAME,
       csrfToken,
-      this.sessionCookieOptions(false),
+      { ...this.sessionCookieOptions(false), path: "/" },
     );
   }
 

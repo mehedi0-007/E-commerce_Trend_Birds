@@ -266,6 +266,19 @@ export const RolesView: React.FC = () => {
                 </div>
               </div>
 
+              <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                <input
+                  type="checkbox"
+                  id="roleActiveCheck"
+                  checked={active}
+                  onChange={(e) => setActive(e.target.checked)}
+                  style={{ width: '18px', height: '18px', accentColor: '#6366f1' }}
+                />
+                <label htmlFor="roleActiveCheck" style={{ fontSize: '0.9rem', cursor: 'pointer' }}>
+                  Role Active Status
+                </label>
+              </div>
+
               {/* Shortcut: Grant All Permissions */}
               <div
                 className="card"
