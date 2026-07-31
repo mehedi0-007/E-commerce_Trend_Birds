@@ -7,7 +7,13 @@ import {
   Res,
   UnauthorizedException,
 } from "@nestjs/common";
-import { ApiTags, ApiOperation, ApiBearerAuth } from "@nestjs/swagger";
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiSecurity,
+  ApiHeader,
+} from "@nestjs/swagger";
 import { Request, Response } from "express";
 import { CurrentUser } from "../common/decorators/current-user.decorator";
 import { Public } from "../common/decorators/public.decorator";
@@ -49,6 +55,12 @@ export class AuthController {
 
   @Public()
   @Post("refresh")
+  @ApiSecurity("x-csrf-token")
+  @ApiHeader({
+    name: "x-csrf-token",
+    description: "CSRF token returned during login/refresh",
+    required: true,
+  })
   @ApiOperation({ summary: "Rotate Refresh Token & Issue Access Token" })
   async refresh(
     @Req() request: Request,
@@ -73,6 +85,12 @@ export class AuthController {
 
   @Public()
   @Post("logout")
+  @ApiSecurity("x-csrf-token")
+  @ApiHeader({
+    name: "x-csrf-token",
+    description: "CSRF token returned during login/refresh",
+    required: true,
+  })
   @ApiOperation({ summary: "User Logout & Cookie Revocation" })
   async logout(
     @Req() request: Request,
