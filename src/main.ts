@@ -33,7 +33,8 @@ async function bootstrap() {
     .setDescription("E-Commerce Admin System featuring Granular Action-Based RBAC Matrix and Single-In-Flight Token Refresh Strategy.")
     .setVersion("1.0.0")
     .addBearerAuth()
-    .addCookieAuth("refreshToken")
+    .addCookieAuth("refresh_token")
+    .addApiKey({ type: "apiKey", name: "x-csrf-token", in: "header" }, "x-csrf-token")
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
