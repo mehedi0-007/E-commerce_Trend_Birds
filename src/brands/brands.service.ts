@@ -170,6 +170,16 @@ export class BrandsService {
   async remove(id: string) {
     const brand = await this.findOne(id);
 
+    const productCount = await this.prisma.product.count({
+      where: { brandId: id },
+    });
+
+    if (productCount > 0) {
+      throw new ConflictException(
+        `Cannot delete brand "${brand.name}" because it is currently referenced by ${productCount} product(s)`,
+      );
+    }
+
     await this.prisma.brand.delete({
       where: { id },
     });
