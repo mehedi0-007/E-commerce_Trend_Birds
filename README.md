@@ -8,22 +8,22 @@ This application strictly implements all 9 system modules, granular action-based
 
 ## 📋 Table of Contents
 
-1. [Project Overview](#1-project-overview)
-2. [Technology Stack & System Requirements](#2-technology-stack--system-requirements)
-3. [Startup & Execution Guide](#3-startup--execution-guide)
-   - [Option A: Docker Compose (Recommended)](#option-a-docker-compose-orchestration-recommended)
-   - [Option B: Manual Local Development (Without Docker)](#option-b-manual-local-development-without-docker)
-   - [Option C: Remote PostgreSQL (e.g. Neon Serverless)](#option-c-remote-postgresql-eg-neon-serverless)
-4. [Environment Variables (.env) Configuration Guide](#4-environment-variables-env-configuration-guide)
-5. [Pre-Seeded Accounts & Demo Credentials](#5-pre-seeded-accounts--demo-credentials)
-6. [Security & Access Control Architecture](#6-security--access-control-architecture)
+1. [📌 Project Overview](#1-project-overview)
+2. [🚀 MAIN STARTUP GUIDE: Docker Compose (Primary & Recommended)](#2-main-startup-guide-docker-compose-primary--recommended)
+3. [💻 SECONDARY STARTUP GUIDES (Manual Local & Cloud Database)](#3-secondary-startup-guides-manual-local--cloud-database)
+   - [Option A: Manual Local Development (Without Docker)](#option-a-manual-local-development-without-docker)
+   - [Option B: Remote PostgreSQL (e.g. Neon Serverless)](#option-b-remote-postgresql-eg-neon-serverless)
+4. [⚡ Technology Stack & System Requirements](#4-technology-stack--system-requirements)
+5. [⚙️ Environment Variables (.env) Configuration Guide](#5-environment-variables-env-configuration-guide)
+6. [🔑 Pre-Seeded Accounts & Demo Credentials](#6-pre-seeded-accounts--demo-credentials)
+7. [🔒 Security & Access Control Architecture](#7-security--access-control-architecture)
    - [Global Guards & Permission Structure](#global-guards--permission-structure)
    - [Dual-Token Strategy & Refresh Token Rotation](#dual-token-strategy--refresh-token-rotation)
    - [CSRF Double-Submit Cookie Verification](#csrf-double-submit-cookie-verification)
    - [Self-Escalation & Account Deactivation Guards](#self-escalation--account-deactivation-guards)
-7. [Module-by-Module Compliance & Feature Breakdown](#7-module-by-module-compliance--feature-breakdown)
-8. [Data Integrity & Deletion Cascading Rules](#8-data-integrity--deletion-cascading-rules)
-9. [API Collections & Interactive Swagger UI](#9-api-collections--interactive-swagger-ui)
+8. [📊 Module-by-Module Compliance & Feature Breakdown](#8-module-by-module-compliance--feature-breakdown)
+9. [🛡️ Data Integrity & Deletion Cascading Rules](#9-data-integrity--deletion-cascading-rules)
+10. [📖 API Collections & Interactive Swagger UI](#10-api-collections--interactive-swagger-ui)
 
 ---
 
@@ -31,64 +31,65 @@ This application strictly implements all 9 system modules, granular action-based
 
 The system provides a unified administrative dashboard for e-commerce management. There is no customer storefront or cart processing; the entire application is focused on multi-role administration, security, catalog domain modeling, file asset management, and complex variable product inventory logic.
 
-### 🌟 Key Architectural Highlights
-* **Granular Action-Based RBAC**: Permissions are defined at the `module:action` level (e.g., `product:create`, `role:update`, `media:upload`).
-* **Global Auth Security**: `JwtAuthGuard` is registered globally; routes opt out explicitly using the `@Public()` decorator.
-* **Token Refresh & Revocation**: Short-lived JWT access tokens in client memory + long-lived HttpOnly refresh token cookies stored server-side in PostgreSQL.
-* **Complex Product Engine**: Full support for both **Simple Products** (direct price/stock) and **Variable Products** (attribute-driven variant matrix with distinct SKUs, prices, stock levels, and media attachments).
-* **Nested Taxonomy & Cycle Defense**: Category tree supporting unlimited nesting depth with strict cycle prevention logic.
-* **Shared Media Library**: Single uploads usable across multiple categories, brands, products, variants, and attribute color swatches.
-
 ---
 
-## 2. ⚡ Technology Stack & System Requirements
+## 2. 🚀 MAIN STARTUP GUIDE: Docker Compose (Primary & Recommended)
 
-| Domain | Technology / Spec | Description & Implementation Details |
-| :--- | :--- | :--- |
-| **Runtime** | **Node.js LTS (v20.x)** | Mandatory runtime environment. |
-| **Database** | **PostgreSQL 16** | Mandatory database engine. Local containerized or cloud-hosted. |
-| **Backend Framework** | **NestJS 10.x** | Enterprise NestJS framework (TypeScript) using Express adapter. |
-| **ORM & Migrations** | **Prisma ORM 5.x** | Type-safe schema definition, migrations, seeding, and transactions. |
-| **Authentication** | **Passport JWT & BcryptJS** | Password hashing (rounds=10), JWT access token & HttpOnly refresh token. |
-| **Validation & DTOs** | **Class-Validator & Transformer** | Global `ValidationPipe` with `whitelist: true` and `transform: true`. |
-| **Media Engine** | **Sharp & Multer** | Image dimension parsing, format validation, and thumbnail generation. |
-| **Frontend UI** | **React 18 & Vite** | TypeScript, Lucide Icons, Vanilla CSS design tokens (Dark mode/Glassmorphism). |
-| **HTTP Interceptor** | **Axios Single-In-Flight** | Automatic `401` interceptor with single in-flight token refresh promise queue. |
-| **Containers & Proxy** | **Docker & Nginx** | Multi-stage Docker builds orchestrating database, API, and static Nginx frontend. |
+Docker Compose is the **primary, official, and recommended** method to run the entire application stack (**PostgreSQL 16**, **NestJS Backend API**, and **React Nginx Dashboard**) in isolated production-like containers with zero host configuration required.
 
----
-
-## 3. 🚀 Startup & Execution Guide
-
-### Option A: Docker Compose Orchestration (Recommended)
-
-To launch the full stack (PostgreSQL, NestJS API Server, and Nginx React Frontend) in containerized mode:
+### 🛠️ Step 1: Clone Repository & Create `.env`
 
 ```bash
-# Clone the repository and navigate into the root directory
+# Clone the repository and navigate into the root project directory
 cd project_TB
 
-# Spin up all containers in background mode
+# Copy the sample environment file
+cp .env.example .env
+```
+
+---
+
+### 🛠️ Step 2: Launch Complete Stack via Docker Compose
+
+Run a single command to build and launch all 3 containerized services (`trends-bird-db`, `trends-bird-api`, `trends-bird-frontend`):
+
+```bash
 docker compose up -d --build
 ```
 
 #### 🌐 Active Service Endpoints:
 * **Frontend Admin Dashboard**: [http://localhost:5173](http://localhost:5173)
 * **Interactive Swagger UI**: [http://localhost:3000/api/docs](http://localhost:3000/api/docs)
-* **Backend REST API**: [http://localhost:3000/api](http://localhost:3000/api)
-* **PostgreSQL Database Service**: `localhost:5434`
+* **Backend REST API Base**: [http://localhost:3000/api](http://localhost:3000/api)
+* **PostgreSQL Database Port**: `localhost:5434`
 
 ---
 
-### Option B: Manual Local Development (Without Docker)
+### 🛠️ Docker Container Management Commands
 
-If you wish to run the backend and frontend directly using Node.js on your host machine:
+| Action | Command Line | Description |
+| :--- | :--- | :--- |
+| **Start Containers** | `docker compose up -d` | Starts all services in detached background mode. |
+| **Rebuild Containers** | `docker compose up -d --build` | Forces a rebuild of Docker images after code changes. |
+| **View Live Logs** | `docker compose logs -f api` | Follows realtime logs of the NestJS API container. |
+| **View All Logs** | `docker compose logs -f` | Follows realtime logs of database, API, and frontend. |
+| **Stop Containers** | `docker compose down` | Stops and removes all running containers and networks. |
+| **Clean Reset (Wipe DB)** | `docker compose down -v` | Stops containers and deletes database volume data for a clean seed test. |
+| **Check Container Status** | `docker ps` | Displays container IDs, status, ports, and health checks. |
+
+---
+
+## 3. 💻 SECONDARY STARTUP GUIDES (Manual Local & Cloud Database)
+
+Use these secondary methods only if you prefer running development servers directly on your local host machine without full containerization.
+
+### Option A: Manual Local Development (Without Docker)
 
 #### Prerequisites
-- Node.js v20+ and npm installed.
+- **Node.js v20+ LTS** and npm installed on host machine.
 - PostgreSQL database running (either local PostgreSQL server or containerized `docker compose up -d postgres`).
 
-#### 1. Setup Backend Environment
+#### 1. Setup Backend & Connect Database
 ```bash
 # In the root project directory:
 cp .env.example .env
@@ -105,7 +106,7 @@ npm install
 # Generate Prisma Client
 npx prisma generate
 
-# Apply database schema changes
+# Push database schema tables to PostgreSQL
 npx prisma db push
 
 # Seed system permissions, default roles, and demo users
@@ -131,7 +132,7 @@ npm run dev
 
 ---
 
-### Option C: Remote PostgreSQL (e.g. Neon Serverless)
+### Option B: Remote PostgreSQL (e.g. Neon Serverless)
 
 To connect the application to a cloud-hosted PostgreSQL database such as Neon:
 
@@ -139,16 +140,34 @@ To connect the application to a cloud-hosted PostgreSQL database such as Neon:
    ```env
    DATABASE_URL="postgresql://neondb_owner:YOUR_PASSWORD@ep-your-endpoint.ap-southeast-1.aws.neon.tech/neondb?sslmode=require"
    ```
-2. If system DNS resolution experiences issues with cloud hostnames, verify connectivity via:
+2. If local system DNS resolution experiences issues with cloud hostnames (`SERVFAIL`), restart the local DNS service (`sudo systemctl restart systemd-resolved`).
+3. Apply schema and seed remotely:
    ```bash
    npx prisma db push
    npx prisma db seed
    ```
-3. Start the application with `npm run start:dev` or `docker compose up -d`.
+4. Start the application with `npm run start:dev` or `docker compose up -d`.
 
 ---
 
-## 4. ⚙️ Environment Variables (.env) Configuration Guide
+## 4. ⚡ Technology Stack & System Requirements
+
+| Domain | Technology / Spec | Description & Implementation Details |
+| :--- | :--- | :--- |
+| **Runtime** | **Node.js LTS (v20.x)** | Mandatory runtime environment. |
+| **Database** | **PostgreSQL 16** | Mandatory database engine. Containerized via Docker or cloud-hosted. |
+| **Backend Framework** | **NestJS 10.x** | Enterprise NestJS framework (TypeScript) using Express adapter. |
+| **ORM & Migrations** | **Prisma ORM 5.x** | Type-safe schema definition, migrations, seeding, and transactions. |
+| **Authentication** | **Passport JWT & BcryptJS** | Password hashing (rounds=10), JWT access token & HttpOnly refresh token. |
+| **Validation & DTOs** | **Class-Validator & Transformer** | Global `ValidationPipe` with `whitelist: true` and `transform: true`. |
+| **Media Engine** | **Sharp & Multer** | Image dimension parsing, format validation, and thumbnail generation. |
+| **Frontend UI** | **React 18 & Vite** | TypeScript, Lucide Icons, Vanilla CSS design tokens (Dark mode/Glassmorphism). |
+| **HTTP Interceptor** | **Axios Single-In-Flight** | Automatic `401` interceptor with single in-flight token refresh promise queue. |
+| **Containers & Proxy** | **Docker & Nginx** | Multi-stage Docker builds orchestrating database, API, and static Nginx frontend. |
+
+---
+
+## 5. ⚙️ Environment Variables (.env) Configuration Guide
 
 The root `.env` file controls backend configuration, security secrets, database connections, and CORS settings. A complete sample is provided in `.env.example`.
 
@@ -166,7 +185,7 @@ The root `.env` file controls backend configuration, security secrets, database 
 
 ---
 
-## 5. 🔑 Pre-Seeded Accounts & Demo Credentials
+## 6. 🔑 Pre-Seeded Accounts & Demo Credentials
 
 The database seed script (`prisma/seed.ts`) populates all 46 system permissions, creates standard roles, and seeds two test accounts specifically designed for evaluation.
 
@@ -177,7 +196,7 @@ The database seed script (`prisma/seed.ts`) populates all 46 system permissions,
 
 ---
 
-## 6. 🔒 Security & Access Control Architecture
+## 7. 🔒 Security & Access Control Architecture
 
 ### Global Guards & Permission Structure
 Access control is enforced strictly on the backend API layer:
@@ -204,7 +223,7 @@ Access control is enforced strictly on the backend API layer:
 
 ---
 
-## 7. 📊 Module-by-Module Compliance & Feature Breakdown
+## 8. 📊 Module-by-Module Compliance & Feature Breakdown
 
 All 9 required modules are **100% Complete** and fully implemented in both the NestJS API and React Frontend:
 
@@ -238,7 +257,7 @@ All 9 required modules are **100% Complete** and fully implemented in both the N
 
 ---
 
-## 8. 🛡️ Data Integrity & Deletion Cascading Rules
+## 9. 🛡️ Data Integrity & Deletion Cascading Rules
 
 | Entity / Target | Deletion & Cascade Policy | Technical Rationale & Behavior |
 | :--- | :--- | :--- |
@@ -252,7 +271,7 @@ All 9 required modules are **100% Complete** and fully implemented in both the N
 
 ---
 
-## 9. 📖 API Collections & Interactive Swagger UI
+## 10. 📖 API Collections & Interactive Swagger UI
 
 ### 1. Interactive Swagger Explorer
 Launch the backend server and open:
