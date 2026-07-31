@@ -12,6 +12,8 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "prisma db seed",
+    "build:frontend": "cd frontend && npm run build",
+    "start:frontend": "cd frontend && npm run dev",
     "docker_up": "docker compose up -d --build && docker compose logs -f api",
     "docker_down": "docker compose down"
   },
