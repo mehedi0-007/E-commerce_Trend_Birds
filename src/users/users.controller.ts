@@ -9,6 +9,7 @@ import {
   Put,
   Query,
 } from "@nestjs/common";
+import { ApiTags, ApiOperation, ApiBearerAuth } from "@nestjs/swagger";
 import { CurrentUser } from "../common/decorators/current-user.decorator";
 import { Permissions } from "../common/decorators/permissions.decorator";
 import { AuthenticatedUser } from "../common/interfaces/authenticated-user.interface";
@@ -18,30 +19,36 @@ import { UpdateUserStatusDto } from "./dto/update-user-status.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { UsersService } from "./users.service";
 
+@ApiTags("Users Management")
+@ApiBearerAuth()
 @Controller("users")
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
   @Permissions("user:read")
+  @ApiOperation({ summary: "List Users (Paginated & Searchable)" })
   findAll(@Query() query: QueryUserDto) {
     return this.usersService.findAll(query);
   }
 
   @Get(":id")
   @Permissions("user:read")
+  @ApiOperation({ summary: "Get User Details" })
   findOne(@Param("id") id: string) {
     return this.usersService.findOne(id);
   }
 
   @Post()
   @Permissions("user:create")
+  @ApiOperation({ summary: "Create User Account & Assign Role" })
   create(@Body() dto: CreateUserDto) {
     return this.usersService.create(dto);
   }
 
   @Put(":id")
   @Permissions("user:update")
+  @ApiOperation({ summary: "Update User Details & Role" })
   update(
     @Param("id") id: string,
     @Body() dto: UpdateUserDto,
@@ -52,6 +59,7 @@ export class UsersController {
 
   @Patch(":id/status")
   @Permissions("user:update")
+  @ApiOperation({ summary: "Toggle User Active / Inactive Status" })
   updateStatus(
     @Param("id") id: string,
     @Body() dto: UpdateUserStatusDto,
@@ -62,6 +70,7 @@ export class UsersController {
 
   @Delete(":id")
   @Permissions("user:delete")
+  @ApiOperation({ summary: "Delete User Account" })
   remove(
     @Param("id") id: string,
     @CurrentUser() currentUser: AuthenticatedUser,

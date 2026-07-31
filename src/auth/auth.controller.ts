@@ -7,6 +7,7 @@ import {
   Res,
   UnauthorizedException,
 } from "@nestjs/common";
+import { ApiTags, ApiOperation, ApiBearerAuth } from "@nestjs/swagger";
 import { Request, Response } from "express";
 import { CurrentUser } from "../common/decorators/current-user.decorator";
 import { Public } from "../common/decorators/public.decorator";
@@ -17,12 +18,14 @@ import { LoginDto } from "./dto/login.dto";
 const REFRESH_COOKIE_NAME = "refresh_token";
 const CSRF_COOKIE_NAME = "csrf_token";
 
+@ApiTags("Authentication")
 @Controller("auth")
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Public()
   @Post("login")
+  @ApiOperation({ summary: "User Authentication & Sign-In" })
   async login(
     @Body() dto: LoginDto,
     @Res({ passthrough: true }) response: Response,
@@ -38,12 +41,15 @@ export class AuthController {
   }
 
   @Get("session")
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Fetch Active Session & User Profile" })
   session(@CurrentUser() user: AuthenticatedUser) {
     return { user };
   }
 
   @Public()
   @Post("refresh")
+  @ApiOperation({ summary: "Rotate Refresh Token & Issue Access Token" })
   async refresh(
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
@@ -67,6 +73,7 @@ export class AuthController {
 
   @Public()
   @Post("logout")
+  @ApiOperation({ summary: "User Logout & Cookie Revocation" })
   async logout(
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
