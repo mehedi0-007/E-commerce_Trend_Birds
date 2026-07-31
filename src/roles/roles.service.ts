@@ -129,7 +129,7 @@ export class RolesService {
       targetPermissionIds = dto.permissionIds;
     }
 
-    return this.prisma.$transaction(async (tx) => {
+    const createdRoleId = await this.prisma.$transaction(async (tx) => {
       const role = await tx.role.create({
         data: {
           name: dto.name,
@@ -147,8 +147,10 @@ export class RolesService {
         });
       }
 
-      return this.findOne(role.id);
+      return role.id;
     });
+
+    return this.findOne(createdRoleId);
   }
 
   async update(id: string, dto: UpdateRoleDto) {
@@ -192,7 +194,7 @@ export class RolesService {
       }
     }
 
-    return this.prisma.$transaction(async (tx) => {
+    const updatedRoleId = await this.prisma.$transaction(async (tx) => {
       await tx.role.update({
         where: { id },
         data: {
@@ -217,8 +219,10 @@ export class RolesService {
         }
       }
 
-      return this.findOne(id);
+      return id;
     });
+
+    return this.findOne(updatedRoleId);
   }
 
   async remove(id: string) {

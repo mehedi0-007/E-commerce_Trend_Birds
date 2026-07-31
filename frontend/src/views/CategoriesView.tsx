@@ -45,7 +45,7 @@ export const CategoriesView: React.FC = () => {
         apiClient.get('/categories?limit=100'),
         apiClient.get('/media?limit=50'),
       ]);
-      setTreeCategories(treeRes.data || []);
+      setTreeCategories(treeRes.data?.data || []);
       setFlatCategories(flatRes.data.data || []);
       setMediaList(mediaRes.data.data || []);
     } catch {
