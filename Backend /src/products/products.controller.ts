@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Put,
   Query,
@@ -57,7 +58,7 @@ export class ProductsController {
     return this.productsService.findOne(id);
   }
 
-  @Put(":id")
+  @Patch(":id")
   @Permissions("product:update")
   @ApiOperation({ summary: "Update Product Details & Variant Combinations" })
   async update(@Param("id") id: string, @Body() dto: UpdateProductDto) {

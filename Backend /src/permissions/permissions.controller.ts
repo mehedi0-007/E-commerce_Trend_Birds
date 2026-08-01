@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Put,
   Query,
@@ -42,7 +43,7 @@ export class PermissionsController {
     return this.permissionsService.createGroup(dto);
   }
 
-  @Put("groups/:id")
+  @Patch("groups/:id")
   @Permissions("permission:update")
   @ApiOperation({ summary: "Update Permission Group" })
   updateGroup(

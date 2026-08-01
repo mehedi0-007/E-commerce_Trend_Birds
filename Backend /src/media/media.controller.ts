@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Put,
   Query,
@@ -70,7 +71,7 @@ export class MediaController {
     return this.mediaService.findOne(id);
   }
 
-  @Put(":id")
+  @Patch(":id")
   @Permissions("media:write")
   @ApiOperation({ summary: "Update Media Asset Metadata (Alt Text, Title)" })
   async update(@Param("id") id: string, @Body() dto: UpdateMediaDto) {

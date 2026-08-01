@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Put,
   Query,
@@ -57,7 +58,7 @@ export class AttributesController {
     return this.attributesService.findOne(id);
   }
 
-  @Put(":id")
+  @Patch(":id")
   @Permissions("attribute:update")
   @ApiOperation({ summary: "Update Attribute Definition" })
   async update(@Param("id") id: string, @Body() dto: UpdateAttributeDto) {
