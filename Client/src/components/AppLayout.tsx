@@ -20,17 +20,36 @@ export const AppLayout: React.FC = () => {
 
   const navItems = [
     { name: 'Dashboard', path: '/', module: 'dashboard', icon: LayoutDashboard },
-    { name: 'Permissions', path: '/permissions', module: 'permission', icon: Shield },
-    { name: 'Roles', path: '/roles', module: 'role', icon: UserCheck },
-    { name: 'Users', path: '/users', module: 'user', icon: Users },
-    { name: 'Media Library', path: '/media', module: 'media', icon: ImageIcon },
+    { name: 'Products', path: '/products', module: 'product', icon: Package },
     { name: 'Categories', path: '/categories', module: 'category', icon: FolderTree },
     { name: 'Brands', path: '/brands', module: 'brand', icon: Tag },
     { name: 'Attributes', path: '/attributes', module: 'attribute', icon: Sliders },
-    { name: 'Products', path: '/products', module: 'product', icon: Package },
+    { name: 'Media Library', path: '/media', module: 'media', icon: ImageIcon },
+  ];
+
+  const systemNavItems = [
+    { name: 'Users', path: '/users', module: 'user', icon: Users },
+    { name: 'Roles', path: '/roles', module: 'role', icon: UserCheck },
+    { name: 'Permissions', path: '/permissions', module: 'permission', icon: Shield },
   ];
 
   const visibleNavItems = navItems.filter((item) => canWatch(item.module));
+  const visibleSystemItems = systemNavItems.filter((item) => canWatch(item.module));
+
+  const renderNavItem = (item: any) => {
+    const Icon = item.icon;
+    return (
+      <NavLink
+        key={item.path}
+        to={item.path}
+        className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+        end={item.path === '/'}
+      >
+        <Icon size={18} />
+        <span>{item.name}</span>
+      </NavLink>
+    );
+  };
 
   return (
     <div className="app-shell">
@@ -42,21 +61,15 @@ export const AppLayout: React.FC = () => {
         </div>
 
         <nav className="sidebar-nav">
-          <div className="nav-group-title">Navigation</div>
-          {visibleNavItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-                end={item.path === '/'}
-              >
-                <Icon size={18} />
-                <span>{item.name}</span>
-              </NavLink>
-            );
-          })}
+          <div className="nav-group-title">Catalog & Content</div>
+          {visibleNavItems.map(renderNavItem)}
+
+          {visibleSystemItems.length > 0 && (
+            <>
+              <div className="nav-group-title" style={{ marginTop: '2rem' }}>System & Security</div>
+              {visibleSystemItems.map(renderNavItem)}
+            </>
+          )}
         </nav>
       </aside>
 
