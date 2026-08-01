@@ -1,32 +1,64 @@
-# React + TypeScript + Vite
+# Trends Bird Limited — Admin Dashboard (Client)
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+This is the frontend React application for the Trends Bird Limited E-Commerce Admin System. It is a single-page application (SPA) built with Vite, React 18, and standard CSS.
 
-Currently, two official plugins are available:
+## ⚡ Technology Stack
+- **Framework**: React 18
+- **Build Tool**: Vite
+- **Styling**: Vanilla CSS (CSS Modules & Global Tokens)
+- **Icons**: Lucide React
+- **HTTP Client**: Axios (configured with credentials for secure HttpOnly cookie handling)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🚀 Local Development Setup
 
-## React Compiler
+### 1. Install Dependencies
+Make sure you have Node.js v20+ installed, then run:
+```bash
+npm install
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 2. Configure Environment Variables
+Create a `.env` file in the root of the `Client` directory:
+```env
+# Point this to your backend server URL
+VITE_API_URL=http://localhost:3000/api
+```
 
-## Expanding the Oxlint configuration
+### 3. Start Development Server
+```bash
+npm run dev
+```
+The application will be available at `http://localhost:5173`.
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+## 📦 Cloud Deployment (Vercel)
 
+This frontend is configured to be seamlessly deployed on **Vercel**. 
+
+1. Push this directory to your GitHub repository.
+2. Import the project into Vercel.
+3. Vercel will automatically detect the **Vite** framework.
+4. **Important**: Ensure your `vercel.json` file is correctly configured with your backend's deployment URL (e.g., Render) to correctly proxy `/api` and `/uploads` requests and avoid CORS issues.
+
+Example `vercel.json`:
 ```json
 {
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
+  "rewrites": [
+    {
+      "source": "/api/:match*",
+      "destination": "https://your-backend-app.onrender.com/api/:match*"
+    },
+    {
+      "source": "/uploads/:match*",
+      "destination": "https://your-backend-app.onrender.com/uploads/:match*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
 }
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## 🔒 Security Features
+- **Double-Submit Cookie Verification**: Intercepts `csrf_token` from cookies and appends it to headers automatically.
+- **Single-In-Flight Token Refresh**: Automatically intercepts `401 Unauthorized` errors and queues pending requests while silently refreshing the access token in the background.
