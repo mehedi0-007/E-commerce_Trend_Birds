@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { apiClient, setAccessToken, setCsrfToken } from '../api/client';
+import { apiClient, getAccessToken, setAccessToken, setCsrfToken } from '../api/client';
 
 export interface UserRole {
   id: string;
@@ -46,6 +46,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchSession = async () => {
     try {
+      if (!getAccessToken()) {
+        try {
+          await apiClient.post('/auth/refresh');
+        } catch {
+          // If refresh fails, user is unauthenticated
+          setUser(null);
+          setIsLoading(false);
+          return;
+        }
+      }
+
       const response = await apiClient.get('/auth/session');
       const payload = response.data?.data || response.data;
       if (payload?.user) {

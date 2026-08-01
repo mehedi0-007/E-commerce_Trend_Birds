@@ -142,7 +142,7 @@ export const MediaView: React.FC = () => {
           </p>
         </div>
 
-        {hasPermission('media:create') && (
+        {hasPermission('media:upload') && (
           <button className="btn btn-primary" onClick={() => setShowUploadModal(true)}>
             <Upload size={18} /> Upload Files
           </button>
@@ -252,7 +252,7 @@ export const MediaView: React.FC = () => {
               </div>
 
               <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.75rem', paddingTop: '0.5rem', borderTop: '1px solid var(--border-color)' }}>
-                {hasPermission('media:update') ? (
+                {hasPermission('media:write') ? (
                   <button
                     className="btn btn-secondary btn-sm"
                     style={{ flex: 1 }}

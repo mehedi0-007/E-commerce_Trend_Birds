@@ -66,6 +66,8 @@ export const RolesView: React.FC = () => {
     setShowModal(true);
   };
 
+  const totalSystemPermissionsCount = permissionGroups.reduce((acc, g) => acc + g.permissions.length, 0);
+
   const handleOpenEdit = async (role: Role) => {
     setIsSubmitting(true);
     try {
@@ -75,8 +77,12 @@ export const RolesView: React.FC = () => {
       setRoleName(detailedRole.name);
       setDescription(detailedRole.description || '');
       setActive(detailedRole.active);
-      setGrantAll(false);
-      setSelectedPermissionIds(detailedRole.permissionIds || []);
+
+      const assignedIds = detailedRole.permissionIds || [];
+      const hasAllPerms = totalSystemPermissionsCount > 0 && assignedIds.length === totalSystemPermissionsCount;
+      setGrantAll(hasAllPerms);
+      setSelectedPermissionIds(assignedIds);
+
       setError(null);
       setShowModal(true);
     } catch {
@@ -171,50 +177,86 @@ export const RolesView: React.FC = () => {
               <tr>
                 <th>Role Name</th>
                 <th>Description</th>
+                <th>Permissions Assigned</th>
                 <th>Users Assigned</th>
                 <th>Status</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {roles.map((role) => (
-                <tr key={role.id}>
-                  <td style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{role.name}</td>
-                  <td>{role.description || '-'}</td>
-                  <td>
-                    <span className="badge badge-info">{role.userCount} Active Users</span>
-                  </td>
-                  <td>
-                    {role.active ? (
-                      <span className="badge badge-success">Active</span>
-                    ) : (
-                      <span className="badge badge-danger">Inactive</span>
-                    )}
-                  </td>
-                  <td>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      {hasPermission('role:update') && (
-                        <button
-                          className="btn btn-secondary btn-sm"
-                          onClick={() => handleOpenEdit(role)}
-                          title="Edit Role"
-                        >
-                          <Edit2 size={14} /> Edit
-                        </button>
+              {roles.map((role) => {
+                const perms = role.permissions || [];
+                const isSuperAdmin =
+                  (totalSystemPermissionsCount > 0 && perms.length >= totalSystemPermissionsCount) ||
+                  role.name.toLowerCase().includes('admin');
+
+                return (
+                  <tr key={role.id}>
+                    <td style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{role.name}</td>
+                    <td>{role.description || '-'}</td>
+                    <td>
+                      {isSuperAdmin ? (
+                        <span className="badge badge-success" style={{ fontWeight: 600 }}>
+                          Super Admin (All Permissions)
+                        </span>
+                      ) : perms.length === 0 ? (
+                        <span className="badge badge-secondary" style={{ opacity: 0.7 }}>
+                          0 Permissions
+                        </span>
+                      ) : (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem', maxWidth: '320px' }}>
+                          {perms.slice(0, 4).map((p) => (
+                            <span key={p.id} className="badge badge-info" style={{ fontSize: '0.75rem' }}>
+                              {p.name}
+                            </span>
+                          ))}
+                          {perms.length > 4 && (
+                            <span
+                              className="badge badge-secondary"
+                              title={perms.slice(4).map((p) => p.name).join(', ')}
+                              style={{ fontSize: '0.75rem', cursor: 'help' }}
+                            >
+                              +{perms.length - 4} more
+                            </span>
+                          )}
+                        </div>
                       )}
-                      {hasPermission('role:delete') && (
-                        <button
-                          className="btn btn-danger btn-sm"
-                          onClick={() => handleDeleteRole(role)}
-                          title="Delete Role"
-                        >
-                          <Trash2 size={14} />
-                        </button>
+                    </td>
+                    <td>
+                      <span className="badge badge-info">{role.userCount} Active Users</span>
+                    </td>
+                    <td>
+                      {role.active ? (
+                        <span className="badge badge-success">Active</span>
+                      ) : (
+                        <span className="badge badge-danger">Inactive</span>
                       )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        {hasPermission('role:update') && (
+                          <button
+                            className="btn btn-secondary btn-sm"
+                            onClick={() => handleOpenEdit(role)}
+                            title="Edit Role"
+                          >
+                            <Edit2 size={14} /> Edit
+                          </button>
+                        )}
+                        {hasPermission('role:delete') && (
+                          <button
+                            className="btn btn-danger btn-sm"
+                            onClick={() => handleDeleteRole(role)}
+                            title="Delete Role"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -377,7 +419,7 @@ export const RolesView: React.FC = () => {
                                     onChange={() => togglePermission(perm.id)}
                                     style={{ accentColor: '#6366f1' }}
                                   />
-                                  <span>{perm.name.split(':')[1] || perm.name}</span>
+                                  <span style={{ fontWeight: isChecked ? 600 : 400 }}>{perm.name}</span>
                                 </label>
                               );
                             })}

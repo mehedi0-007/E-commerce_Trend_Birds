@@ -31,9 +31,13 @@ export const PermissionsView: React.FC = () => {
   const [editingGroup, setEditingGroup] = useState<PermissionGroup | null>(null);
   const [groupName, setGroupName] = useState('');
   const [description, setDescription] = useState('');
-  const [actionsInput, setActionsInput] = useState('read, create, update, delete');
+  const [selectedStandardActions, setSelectedStandardActions] = useState<string[]>(['read', 'create', 'update', 'delete']);
+  const [customActions, setCustomActions] = useState<string[]>([]);
+  const [customActionInput, setCustomActionInput] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const STANDARD_ACTIONS = ['read', 'create', 'update', 'delete', 'watch', 'upload', 'write', 'approve', 'status'];
 
   const fetchGroups = async () => {
     setIsLoading(true);
@@ -60,7 +64,9 @@ export const PermissionsView: React.FC = () => {
     setEditingGroup(null);
     setGroupName('');
     setDescription('');
-    setActionsInput('read, create, update, delete');
+    setSelectedStandardActions(['read', 'create', 'update', 'delete']);
+    setCustomActions([]);
+    setCustomActionInput('');
     setError(null);
     setShowModal(true);
   };
@@ -69,38 +75,66 @@ export const PermissionsView: React.FC = () => {
     setEditingGroup(group);
     setGroupName(group.name);
     setDescription(group.description || '');
-    // Extract actions from existing permission names (e.g. 'product:create' -> 'create')
+    
     const extractedActions = group.permissions.map((p) => {
       const parts = p.name.split(':');
-      return parts.length > 1 ? parts[1] : p.name;
+      return (parts.length > 1 ? parts[1] : p.name).toLowerCase();
     });
-    setActionsInput(extractedActions.join(', '));
+
+    const standard = extractedActions.filter((a) => STANDARD_ACTIONS.includes(a));
+    const custom = extractedActions.filter((a) => !STANDARD_ACTIONS.includes(a));
+
+    setSelectedStandardActions(Array.from(new Set(standard)));
+    setCustomActions(Array.from(new Set(custom)));
+    setCustomActionInput('');
     setError(null);
     setShowModal(true);
+  };
+
+  const toggleStandardAction = (action: string) => {
+    setSelectedStandardActions((prev) =>
+      prev.includes(action) ? prev.filter((a) => a !== action) : [...prev, action]
+    );
+  };
+
+  const handleAddCustomAction = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const trimmed = customActionInput.trim().toLowerCase();
+    if (!trimmed) return;
+    if (!customActions.includes(trimmed) && !selectedStandardActions.includes(trimmed)) {
+      setCustomActions((prev) => [...prev, trimmed]);
+    }
+    setCustomActionInput('');
+  };
+
+  const handleRemoveCustomAction = (action: string) => {
+    setCustomActions((prev) => prev.filter((a) => a !== action));
   };
 
   const handleSubmitGroup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    setIsSubmitting(true);
 
-    const actions = actionsInput
-      .split(',')
-      .map((a) => a.trim())
-      .filter((a) => a.length > 0);
+    const allActions = Array.from(new Set([...selectedStandardActions, ...customActions]));
+    if (allActions.length === 0) {
+      setError('Please select or enter at least one action for this group.');
+      return;
+    }
+
+    setIsSubmitting(true);
 
     try {
       if (editingGroup) {
         await apiClient.put(`/permissions/groups/${editingGroup.id}`, {
           name: groupName,
           description,
-          actions,
+          actions: allActions,
         });
       } else {
         await apiClient.post('/permissions/groups', {
           name: groupName,
           description,
-          actions,
+          actions: allActions,
         });
       }
 
@@ -294,18 +328,87 @@ export const PermissionsView: React.FC = () => {
                 />
               </div>
 
+              <div className="form-group" style={{ marginBottom: '1.25rem' }}>
+                <label className="form-label" style={{ fontWeight: 600, marginBottom: '0.5rem', display: 'block' }}>
+                  Standard Module Actions
+                </label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.6rem' }}>
+                  {STANDARD_ACTIONS.map((action) => {
+                    const isChecked = selectedStandardActions.includes(action);
+                    return (
+                      <label
+                        key={action}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem',
+                          padding: '0.4rem 0.6rem',
+                          borderRadius: 'var(--radius-sm)',
+                          background: isChecked ? 'var(--accent-glow)' : 'rgba(255, 255, 255, 0.03)',
+                          border: isChecked ? '1px solid rgba(99, 102, 241, 0.4)' : '1px solid var(--border-color)',
+                          cursor: 'pointer',
+                          fontSize: '0.85rem',
+                          textTransform: 'capitalize',
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => toggleStandardAction(action)}
+                          style={{ accentColor: '#6366f1' }}
+                        />
+                        <span>{action}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
               <div className="form-group">
-                <label className="form-label">Actions (Comma-separated)</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="watch, read, create, update, delete"
-                  value={actionsInput}
-                  onChange={(e) => setActionsInput(e.target.value)}
-                  required
-                />
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                  Will generate permissions as: groupName:action
+                <label className="form-label" style={{ fontWeight: 600 }}>Custom Actions (Optional)</label>
+                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="e.g. publish, export, archive"
+                    value={customActionInput}
+                    onChange={(e) => setCustomActionInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleAddCustomAction();
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => handleAddCustomAction()}
+                  >
+                    + Add
+                  </button>
+                </div>
+
+                {customActions.length > 0 && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginTop: '0.5rem' }}>
+                    {customActions.map((action) => (
+                      <span
+                        key={action}
+                        className="badge badge-info"
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.35rem 0.6rem' }}
+                      >
+                        {action}
+                        <X
+                          size={12}
+                          style={{ cursor: 'pointer', opacity: 0.8 }}
+                          onClick={() => handleRemoveCustomAction(action)}
+                        />
+                      </span>
+                    ))}
+                  </div>
+                )}
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block', marginTop: '0.4rem' }}>
+                  Will generate permissions as: <strong>{groupName.toLowerCase() || 'group'}:action</strong>
                 </span>
               </div>
 

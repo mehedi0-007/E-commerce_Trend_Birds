@@ -26,7 +26,7 @@ export class MediaController {
   constructor(private readonly mediaService: MediaService) {}
 
   @Post("upload")
-  @Permissions("media:create")
+  @Permissions("media:upload")
   @ApiConsumes("multipart/form-data")
   @ApiOperation({ summary: "Upload Single Media File with Thumbnail Generation" })
   @UseInterceptors(FileInterceptor("file"))
@@ -40,7 +40,7 @@ export class MediaController {
   }
 
   @Post("upload-multiple")
-  @Permissions("media:create")
+  @Permissions("media:upload")
   @ApiConsumes("multipart/form-data")
   @ApiOperation({ summary: "Upload Multiple Media Files in Batch" })
   @UseInterceptors(FilesInterceptor("files", 10))
@@ -71,7 +71,7 @@ export class MediaController {
   }
 
   @Put(":id")
-  @Permissions("media:update")
+  @Permissions("media:write")
   @ApiOperation({ summary: "Update Media Asset Metadata (Alt Text, Title)" })
   async update(@Param("id") id: string, @Body() dto: UpdateMediaDto) {
     return this.mediaService.update(id, dto);
