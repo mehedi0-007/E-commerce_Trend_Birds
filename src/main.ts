@@ -10,7 +10,7 @@ import { AppModule } from "./app.module";
 function checkEnvironment() {
   const requiredEnvs = [
     'DATABASE_URL',
-    'JWT_SECRET',
+    'JWT_ACCESS_SECRET',
     'JWT_REFRESH_SECRET',
     'CORS_ORIGIN',
   ];
