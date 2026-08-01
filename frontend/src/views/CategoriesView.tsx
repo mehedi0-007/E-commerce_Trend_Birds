@@ -40,14 +40,20 @@ export const CategoriesView: React.FC = () => {
   const fetchCategories = async () => {
     setIsLoading(true);
     try {
-      const [treeRes, flatRes, mediaRes] = await Promise.all([
+      const [treeRes, flatRes] = await Promise.all([
         apiClient.get('/categories/tree'),
-        apiClient.get('/categories?limit=100'),
-        apiClient.get('/media?limit=50'),
+        apiClient.get('/categories?limit=100')
       ]);
       setTreeCategories(treeRes.data?.data || []);
-      setFlatCategories(flatRes.data.data || []);
-      setMediaList(mediaRes.data.data || []);
+      setFlatCategories(flatRes.data?.data || []);
+
+      // Fetch media separately, silently fallback to empty array if user lacks permission
+      try {
+        const mediaRes = await apiClient.get('/media?limit=50');
+        setMediaList(mediaRes.data?.data || []);
+      } catch {
+        setMediaList([]);
+      }
     } catch {
     } finally {
       setIsLoading(false);

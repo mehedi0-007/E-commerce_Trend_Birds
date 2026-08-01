@@ -59,9 +59,13 @@ cp .env.example .env
 Run a single command to build and launch all 3 containerized services (`trends-bird-db`, `trends-bird-api`, `trends-bird-frontend`):
 
 ```bash
-docker compose up -d --build
+docker compose up -d && docker compose logs -f
 ```
-
+---
+Run a single command to stop all 3 containerized services 
+```bash
+docker compose down
+```
 ---
 
 ### 🛠️ Docker Container Management Commands
