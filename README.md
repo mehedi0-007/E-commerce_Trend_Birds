@@ -181,17 +181,16 @@ The application is completely decoupled and ready for cloud-native PaaS deployme
 
 The root `.env` file controls backend configuration, security secrets, database connections, and CORS settings. A complete sample is provided in `.env.example`.
 
-| Variable Name | Required | Default / Sample Value | Description & Impact |
-| :--- | :---: | :--- | :--- |
-| `NODE_ENV` | Yes | `development` | Sets runtime environment (`development`, `production`, `test`). |
-| `PORT` | Yes | `3000` | Port number on which the NestJS backend API listens. |
-| `DATABASE_URL` | Yes | `postgresql://postgres:password@localhost:5434/mydb?schema=public` | Complete PostgreSQL connection string used by Prisma ORM. |
-| `JWT_SECRET` | Yes | `super-secret-jwt-key-...` | Secret key used to sign and verify short-lived access JWT tokens. |
-| `JWT_REFRESH_SECRET` | Yes | `super-secret-jwt-refresh-key-...` | Secret key used to sign and verify long-lived refresh tokens. |
-| `JWT_ACCESS_EXPIRATION` | Yes | `15m` | Expiration window for access tokens (10m - 15m recommended). |
-| `JWT_REFRESH_EXPIRATION` | Yes | `7d` | Lifespan for refresh tokens stored in HttpOnly cookies (7d - 30d). |
-| `CORS_ORIGIN` | Yes | `http://localhost:5173` | Allowed origin header for frontend CORS credentialed requests. |
-| `COOKIE_SECURE` | Optional | `false` | Set to `true` in production to enforce `HTTPS`-only HttpOnly cookies. |
+| Variable Name | Required | Default / Sample Value |
+| :--- | :---: | :--- |
+| `PORT` | Yes | `3000` |
+| `DATABASE_URL` | Yes | `postgresql://postgres:password@localhost:5434/mydb?schema=public` |
+| `JWT_SECRET` | Yes | `super-secret-jwt-key-...` |
+| `JWT_REFRESH_SECRET` | Yes | `super-secret-jwt-refresh-key-...` |
+| `JWT_ACCESS_EXPIRATION` | Yes | `15m` |
+| `JWT_REFRESH_EXPIRATION` | Yes | `7d` |
+| `CORS_ORIGIN` | Yes | `http://localhost:5173` |
+| `COOKIE_SECURE` | Optional | `false` |
 
 ---
 
