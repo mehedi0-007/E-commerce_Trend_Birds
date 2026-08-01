@@ -132,21 +132,28 @@ npm run dev
 
 ---
 
-### Option B: Remote PostgreSQL (e.g. Neon Serverless)
+### Option B: Cloud Deployment (Neon + Render + Vercel)
 
-To connect the application to a cloud-hosted PostgreSQL database such as Neon:
+The application is completely decoupled and ready for cloud-native PaaS deployment.
 
-1. Update `DATABASE_URL` in `.env`:
-   ```env
-   DATABASE_URL="postgresql://neondb_owner:YOUR_PASSWORD@ep-your-endpoint.ap-southeast-1.aws.neon.tech/neondb?sslmode=require"
-   ```
-2. If local system DNS resolution experiences issues with cloud hostnames (`SERVFAIL`), restart the local DNS service (`sudo systemctl restart systemd-resolved`).
-3. Apply schema and seed remotely:
-   ```bash
-   npx prisma db push
-   npx prisma db seed
-   ```
-4. Start the application with `npm run start:dev` or `docker compose up -d`.
+#### 1. Database (Neon Serverless Postgres)
+1. Provision a PostgreSQL database on Neon.
+2. Copy the connection string (e.g., `postgresql://...`).
+
+#### 2. Backend API (Render)
+1. Create a **Web Service** on Render connected to your GitHub repository.
+2. **Build Command:** `npm install && npx prisma generate && npx prisma db push && npx ts-node prisma/seed.ts && npm run build`
+   *(This ensures tables are created and the admin user is seeded automatically on deployment).*
+3. **Start Command:** `npm run start:prod`
+4. **Environment Variables:**
+   - `DATABASE_URL`: Your Neon connection string.
+   - `JWT_SECRET` & `JWT_REFRESH_SECRET`: Secure random strings.
+   - `CORS_ORIGIN`: Your exact Vercel frontend URL (e.g., `https://trends-bird-frontend.vercel.app`).
+
+#### 3. Frontend Dashboard (Vercel)
+1. Open `frontend/vercel.json` locally and update the `destination` URLs to match your live Render backend URL.
+2. Create a new **Vite** project on Vercel pointed to the `frontend` root directory.
+3. **Environment Variables:** Add `VITE_API_URL=/api` (The `vercel.json` rewrite will transparently proxy this to the backend).
 
 ---
 
