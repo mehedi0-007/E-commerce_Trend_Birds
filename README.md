@@ -184,7 +184,7 @@ The root `.env` file controls backend configuration, security secrets, database 
 | Variable Name | Required | Default / Sample Value |
 | :--- | :---: | :--- |
 | `PORT` | Yes | `3000` |
-| `DATABASE_URL` | Yes | `postgresql://postgres:password@localhost:5434/mydb?schema=public` |
+| `DATABASE_URL` | Yes | `postgresql://postgres:password@postgres:5432/mydb?schema=public` |
 | `JWT_SECRET` | Yes | `super-secret-jwt-key-...` |
 | `JWT_REFRESH_SECRET` | Yes | `super-secret-jwt-refresh-key-...` |
 | `JWT_ACCESS_EXPIRATION` | Yes | `15m` |
