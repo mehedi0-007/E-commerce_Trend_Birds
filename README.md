@@ -284,7 +284,7 @@ All 9 required modules are **100% Complete** and fully implemented in both the N
 
 ### 1. Interactive Swagger Explorer
 Launch the backend server and open:
-👉 **[http://localhost:3000/api/docs](http://localhost:3000/api/docs)**
+👉 **[https://trend-birds-api.onrender.com/api/docs](https://trend-birds-api.onrender.com/api/docs)**
 
 * Includes `@ApiTags`, `@ApiOperation`, `@ApiBearerAuth`, and `@ApiSecurity("x-csrf-token")`.
 * **Pre-Populated Example Inputs**: All POST/PUT DTO request bodies feature realistic, executable JSON payload examples for one-click testing.
