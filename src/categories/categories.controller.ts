@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Put,
   Query,
@@ -54,7 +55,7 @@ export class CategoriesController {
     return this.categoriesService.findOne(id);
   }
 
-  @Put(":id")
+  @Patch(":id")
   @Permissions("category:update")
   @ApiOperation({ summary: "Update Category" })
   async update(@Param("id") id: string, @Body() dto: UpdateCategoryDto) {
