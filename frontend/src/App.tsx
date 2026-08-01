@@ -62,22 +62,7 @@ const ProtectedRoutes: React.FC = () => {
             </WatchGuard>
           }
         />
-        <Route
-          path="roles"
-          element={
-            <WatchGuard moduleName="role">
-              <RolesView />
-            </WatchGuard>
-          }
-        />
-        <Route
-          path="users"
-          element={
-            <WatchGuard moduleName="user">
-              <UsersView />
-            </WatchGuard>
-          }
-        />
+
         <Route
           path="media"
           element={
@@ -120,6 +105,22 @@ const ProtectedRoutes: React.FC = () => {
         />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
+      <Route
+        path="roles"
+        element={
+          <WatchGuard moduleName="role">
+            <RolesView />
+          </WatchGuard>
+        }
+      />
+      <Route
+        path="users"
+        element={
+          <WatchGuard moduleName="user">
+            <UsersView />
+          </WatchGuard>
+        }
+      />
     </Routes>
   );
 };
