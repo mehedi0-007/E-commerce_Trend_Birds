@@ -2,11 +2,11 @@
   "rewrites": [
     {
       "source": "/api/:match*",
-      "destination": "https://your-backend-app.onrender.com/api/:match*"
+      "destination": "https://trend-birds-api.onrender.com/api/:match*"
     },
     {
       "source": "/uploads/:match*",
-      "destination": "https://your-backend-app.onrender.com/uploads/:match*"
+      "destination": "https://trend-birds-api.onrender.com/uploads/:match*"
     },
     {
       "source": "/(.*)",
