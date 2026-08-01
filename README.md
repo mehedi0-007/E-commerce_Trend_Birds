@@ -32,6 +32,11 @@ This application strictly implements all 9 system modules, granular action-based
 The system provides a unified administrative dashboard for e-commerce management. There is no customer storefront or cart processing; the entire application is focused on multi-role administration, security, catalog domain modeling, file asset management, and complex variable product inventory logic.
 
 ---
+#### 🌐 Active Service Endpoints:
+* **Frontend Admin Dashboard**: https://e-commerce-trend-birds.vercel.app
+* **Interactive Swagger UI**: https://trend-birds-api.onrender.com/api/docs
+* **Backend REST API Base**: https://trend-birds-api.onrender.com/api
+---
 
 ## 2. 🚀 MAIN STARTUP GUIDE: Docker Compose (Primary & Recommended)
 
@@ -56,12 +61,6 @@ Run a single command to build and launch all 3 containerized services (`trends-b
 ```bash
 docker compose up -d --build
 ```
-
-#### 🌐 Active Service Endpoints:
-* **Frontend Admin Dashboard**: [http://localhost:5173](http://localhost:5173)
-* **Interactive Swagger UI**: [http://localhost:3000/api/docs](http://localhost:3000/api/docs)
-* **Backend REST API Base**: [http://localhost:3000/api](http://localhost:3000/api)
-* **PostgreSQL Database Port**: `localhost:5434`
 
 ---
 

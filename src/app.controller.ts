@@ -9,7 +9,7 @@ import { Permissions } from "./common/decorators/permissions.decorator";
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @Get("health")
+  @Get()
   @Public()
   @ApiOperation({ summary: "System Healthcheck" })
   health() {
